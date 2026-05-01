@@ -1,0 +1,187 @@
+.home-page {
+  min-height: 100vh;
+  color: white;
+}
+
+.hero {
+  padding: 105px 7% 70px;
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  align-items: center;
+  gap: 60px;
+}
+
+.badge {
+  display: inline-flex;
+  color: var(--primary);
+  background: rgba(36, 242, 170, 0.1);
+  border: 1px solid rgba(36, 242, 170, 0.22);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+.hero-content h1 {
+  font-size: clamp(42px, 6vw, 76px);
+  line-height: 0.98;
+  letter-spacing: -2.5px;
+  margin: 28px 0 24px;
+  max-width: 850px;
+}
+
+.hero-content p {
+  color: var(--muted);
+  font-size: 19px;
+  line-height: 1.85;
+  max-width: 680px;
+}
+
+.hero-actions {
+  margin-top: 36px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+.hero-card {
+  position: relative;
+  padding: 30px;
+  border-radius: 36px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.05));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(24px);
+  transition: 0.35s ease;
+}
+
+.hero-card:hover {
+  transform: translateY(-8px) rotate(1deg);
+}
+
+.hero-card::before {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  background: var(--primary);
+  filter: blur(110px);
+  opacity: 0.16;
+  top: -50px;
+  right: -40px;
+}
+
+.scan-box {
+  position: relative;
+  min-height: 360px;
+  border: 1px dashed rgba(36, 242, 170, 0.48);
+  border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle, rgba(36, 242, 170, 0.1), transparent 60%),
+    rgba(255,255,255,0.04);
+}
+
+.scan-box svg {
+  font-size: 62px;
+  color: var(--primary);
+  filter: drop-shadow(0 0 20px rgba(36, 242, 170, 0.55));
+}
+
+.scan-box h3 {
+  font-size: 28px;
+  margin: 22px 0 8px;
+}
+
+.scan-box p {
+  color: var(--muted);
+}
+
+.progress {
+  width: 72%;
+  height: 11px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 999px;
+  margin-top: 24px;
+  overflow: hidden;
+}
+
+.progress span {
+  display: block;
+  width: 72%;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--pink));
+  animation: pulseBar 1.7s infinite ease-in-out;
+}
+
+@keyframes pulseBar {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+
+.features {
+  padding: 0 7% 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+}
+
+.feature-card {
+  position: relative;
+  padding: 32px;
+  border-radius: 30px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.045));
+  border: 1px solid var(--border);
+  box-shadow: 0 22px 60px rgba(0,0,0,0.25);
+  overflow: hidden;
+  transition: 0.32s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  border-color: rgba(36, 242, 170, 0.42);
+}
+
+.feature-card::before {
+  content: "";
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  background: var(--secondary);
+  filter: blur(85px);
+  opacity: 0.11;
+  top: -35px;
+  right: -30px;
+}
+
+.feature-card svg {
+  font-size: 40px;
+  color: var(--primary);
+}
+
+.feature-card h3 {
+  margin: 20px 0 10px;
+  font-size: 23px;
+}
+
+.feature-card p {
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+@media (max-width: 950px) {
+  .hero,
+  .features {
+    grid-template-columns: 1fr;
+  }
+}

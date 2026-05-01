@@ -1,0 +1,53 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #050b14;
+  --bg-2: #071827;
+  --card: rgba(255, 255, 255, 0.075);
+  --card-2: rgba(255, 255, 255, 0.115);
+  --border: rgba(255, 255, 255, 0.13);
+  --text: #f7fbff;
+  --muted: #9fb5c3;
+  --primary: #24f2aa;
+  --secondary: #21b8ff;
+  --pink: #a855f7;
+  --danger: #ff5c7a;
+  --shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+  --radius: 28px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--primary);
+  color: #021018;
+}

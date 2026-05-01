@@ -1,0 +1,117 @@
+.premium-page,
+.home-page,
+.auth-page,
+.upload-page,
+.pharmacies-page,
+.dashboard-page {
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-page::before,
+.home-page::before,
+.auth-page::before,
+.upload-page::before,
+.pharmacies-page::before,
+.dashboard-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(36, 242, 170, 0.18), transparent 28%),
+    radial-gradient(circle at 90% 18%, rgba(33, 184, 255, 0.16), transparent 32%),
+    radial-gradient(circle at 50% 90%, rgba(168, 85, 247, 0.12), transparent 35%),
+    linear-gradient(135deg, #050b14 0%, #071827 50%, #050b14 100%);
+}
+
+.premium-page::after,
+.home-page::after,
+.auth-page::after,
+.upload-page::after,
+.pharmacies-page::after,
+.dashboard-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 55px 55px;
+  mask-image: linear-gradient(to bottom, black, transparent 75%);
+}
+
+.glass-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.045));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(24px);
+}
+
+.premium-btn,
+.submit-btn,
+.primary-btn {
+  border: 0;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #021018;
+  font-weight: 900;
+  border-radius: 999px;
+  box-shadow: 0 14px 35px rgba(36, 242, 170, 0.22);
+  transition: 0.28s ease;
+}
+
+.premium-btn:hover,
+.submit-btn:hover,
+.primary-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 55px rgba(36, 242, 170, 0.33);
+}
+
+.secondary-btn {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.065);
+  color: white;
+  transition: 0.28s ease;
+}
+
+.secondary-btn:hover {
+  transform: translateY(-4px);
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(36, 242, 170, 0.45);
+}
+
+.page-heading {
+  text-align: center;
+  margin-bottom: 45px;
+}
+
+.page-heading span {
+  display: inline-block;
+  color: var(--primary);
+  background: rgba(36, 242, 170, 0.1);
+  border: 1px solid rgba(36, 242, 170, 0.22);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 900;
+  margin-bottom: 16px;
+}
+
+.page-heading h1 {
+  font-size: clamp(35px, 5vw, 64px);
+  margin-bottom: 12px;
+  letter-spacing: -1.5px;
+}
+
+.page-heading p {
+  color: var(--muted);
+  max-width: 720px;
+  margin: auto;
+  line-height: 1.8;
+  font-size: 18px;
+}
+
+.muted {
+  color: var(--muted);
+}

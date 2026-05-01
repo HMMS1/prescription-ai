@@ -1,0 +1,187 @@
+.upload-page {
+  min-height: 100vh;
+  padding: 65px 7%;
+}
+
+.upload-header {
+  text-align: center;
+  margin-bottom: 45px;
+}
+
+.upload-header h1 {
+  font-size: clamp(36px, 5vw, 62px);
+  letter-spacing: -1.5px;
+  margin-bottom: 12px;
+}
+
+.upload-header p {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.upload-grid,
+.upload-layout {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.upload-card,
+.result-card {
+  padding: 32px;
+  border-radius: 34px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.045));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(24px);
+}
+
+.premium-upload,
+.upload-box {
+  min-height: 265px;
+  border: 1.8px dashed rgba(36,242,170,0.45);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at center, rgba(36,242,170,0.13), transparent 60%),
+    rgba(255,255,255,0.045);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.premium-upload:hover,
+.upload-box:hover {
+  transform: translateY(-7px);
+  border-color: rgba(36,242,170,0.8);
+  background:
+    radial-gradient(circle at center, rgba(36,242,170,0.2), transparent 65%),
+    rgba(255,255,255,0.075);
+}
+
+.premium-upload input,
+.upload-box input {
+  display: none;
+}
+
+.upload-box svg {
+  color: var(--primary);
+  font-size: 46px;
+  margin-bottom: 14px;
+}
+
+.premium-upload h3,
+.upload-box h3 {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.premium-upload p,
+.upload-box p {
+  color: var(--muted);
+}
+
+.image-preview,
+.preview {
+  margin: 24px 0;
+  padding: 12px;
+  border-radius: 28px;
+  background: rgba(255,255,255,0.085);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.image-preview img,
+.preview img {
+  width: 100%;
+  max-height: 370px;
+  object-fit: contain;
+  border-radius: 22px;
+  background: white;
+}
+
+.analyze-btn,
+.find-btn,
+.link-btn,
+.premium-btn {
+  width: 100%;
+  padding: 16px 24px;
+  margin-top: 22px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.result-card h2,
+.result-panel h2 {
+  font-size: 31px;
+  margin-bottom: 18px;
+}
+
+.empty-result {
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.success-text {
+  color: var(--primary);
+  font-weight: 900;
+  margin-bottom: 18px;
+}
+
+.medicine-list,
+.result-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.medicine-item,
+.medicine-row {
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.09);
+  transition: 0.25s ease;
+}
+
+.medicine-item:hover,
+.medicine-row:hover {
+  transform: translateX(6px);
+  border-color: rgba(36,242,170,0.35);
+  background: rgba(255,255,255,0.105);
+}
+
+.medicine-item {
+  display: flex;
+  gap: 15px;
+}
+
+.medicine-item svg {
+  color: var(--primary);
+  font-size: 24px;
+}
+
+.medicine-item p,
+.medicine-row p {
+  color: var(--muted);
+  margin: 6px 0;
+}
+
+.medicine-item span,
+.medicine-row span {
+  color: var(--secondary);
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .upload-grid,
+  .upload-layout {
+    grid-template-columns: 1fr;
+  }
+}
