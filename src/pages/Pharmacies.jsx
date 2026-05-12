@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  GoogleMap,
-  Marker,
-  useLoadScript,
-} from "@react-google-maps/api";
-import { FaWhatsapp, FaPhoneAlt, FaMapMarkerAlt } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import { FaWhatsapp, FaPhoneAlt, FaMapMarkerAlt, FaComments } from "react-icons/fa";
 import "./Pharmacies.css";
 
 const libraries = ["places"];
@@ -55,7 +52,7 @@ function Pharmacies() {
       },
       (results, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-          const realPharmacies = results.map((place) => ({
+          const realPharmacies = results.slice(0, 3).map((place) => ({
             id: place.place_id,
             name: place.name,
             address: place.vicinity,
@@ -78,7 +75,22 @@ function Pharmacies() {
     <main className="pharmacies-page">
       <section className="pharmacies-header">
         <h1>Nearest Pharmacies</h1>
-        <p>Real nearby pharmacies from Google Maps based on your location.</p>
+        <p>The map suggests the nearest 3 pharmacies based on your location.</p>
+      </section>
+
+      <section className="contracted-hint">
+        <div>
+          <span>Recommended</span>
+          <h2>Need direct chat?</h2>
+          <p>
+            Check our contracted pharmacies. They are registered by the platform and can
+            receive your messages from the chat page.
+          </p>
+        </div>
+
+        <Link to="/contracted-pharmacies" className="premium-btn">
+          <FaComments /> View Contracted Pharmacies
+        </Link>
       </section>
 
       <section className="pharmacies-layout">
@@ -121,7 +133,7 @@ function Pharmacies() {
               <div className="pharmacy-card" key={pharmacy.id}>
                 <div>
                   <h3>
-                    {index === 0 ? "Nearest: " : ""}
+                    {index === 0 ? "Nearest: " : `Option ${index + 1}: `}
                     {pharmacy.name}
                   </h3>
 
@@ -130,9 +142,7 @@ function Pharmacies() {
                   </p>
 
                   <span>
-                    {pharmacy.rating
-                      ? `Rating: ${pharmacy.rating}`
-                      : "No rating"}
+                    {pharmacy.rating ? `Rating: ${pharmacy.rating}` : "No rating"}
                   </span>
                 </div>
 
@@ -146,7 +156,7 @@ function Pharmacies() {
                     <FaMapMarkerAlt />
                   </a>
 
-                  <a href="#" title="Phone will require backend/place details">
+                  <a href="#" title="Phone requires backend/place details">
                     <FaPhoneAlt />
                   </a>
 

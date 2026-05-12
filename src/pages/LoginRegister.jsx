@@ -6,13 +6,8 @@ function LoginRegister() {
   const navigate = useNavigate();
 
   const [isLogin, setIsLogin] = useState(true);
-  const [accountType, setAccountType] = useState("user");
-
   const [form, setForm] = useState({
     fullName: "",
-    pharmacyName: "",
-    address: "",
-    whatsapp: "",
     email: "",
     password: "",
   });
@@ -24,27 +19,74 @@ function LoginRegister() {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const getStoredUsers = () =>
+    JSON.parse(localStorage.getItem("users") || "[]");
 
-    // Fake Login مؤقت لحد ما نعمل Backend
-    const fakeUser = {
-      name: isLogin ? "Test User" : form.fullName,
+  const registerUser = () => {
+    const users = getStoredUsers();
+    const alreadyExists = users.some((user) => user.email === form.email);
+
+    if (alreadyExists) {
+      alert("This email is already registered");
+      return;
+    }
+
+    const newUser = {
+      id: Date.now(),
+      fullName: form.fullName,
       email: form.email,
-      role: isLogin ? "user" : accountType,
-      pharmacyName: form.pharmacyName,
-      address: form.address,
-      whatsapp: form.whatsapp,
+      password: form.password,
+      role: "user",
+    };
+
+    localStorage.setItem("users", JSON.stringify([...users, newUser]));
+
+    localStorage.setItem("token", "fake-token");
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        id: newUser.id,
+        name: newUser.fullName,
+        email: newUser.email,
+        role: "user",
+      })
+    );
+    localStorage.setItem("role", "user");
+
+    navigate("/");
+  };
+
+  const loginUser = () => {
+    /*
+      Temporary fake login:
+      أي Email / Username + أي Password هيدخل عادي دلوقتي كـ user.
+      لما نربط بالباك هنرجع نتحقق من البيانات الحقيقية.
+    */
+
+    const loginId = form.email.trim();
+
+    const fakeLoggedUser = {
+      id: Date.now(),
+      name: loginId || "Test User",
+      email: loginId,
+      username: loginId,
+      role: "user",
     };
 
     localStorage.setItem("token", "fake-token");
-    localStorage.setItem("user", JSON.stringify(fakeUser));
-    localStorage.setItem("role", fakeUser.role);
+    localStorage.setItem("user", JSON.stringify(fakeLoggedUser));
+    localStorage.setItem("role", "user");
 
-    if (fakeUser.role === "pharmacy") {
-      navigate("/pharmacy-dashboard");
+    navigate("/");
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (isLogin) {
+      loginUser();
     } else {
-      navigate("/");
+      registerUser();
     }
   };
 
@@ -59,8 +101,8 @@ function LoginRegister() {
           <h1>Smart medical help, faster pharmacy access.</h1>
 
           <p>
-            Upload prescriptions, understand medicines, and connect with nearby
-            pharmacies in minutes.
+            Users create normal accounts here. Contracted pharmacies can also
+            login here after the dashboard creates their username and password.
           </p>
         </section>
 
@@ -84,26 +126,6 @@ function LoginRegister() {
           </div>
 
           {!isLogin && (
-            <div className="role-select">
-              <button
-                type="button"
-                className={accountType === "user" ? "selected" : ""}
-                onClick={() => setAccountType("user")}
-              >
-                User
-              </button>
-
-              <button
-                type="button"
-                className={accountType === "pharmacy" ? "selected" : ""}
-                onClick={() => setAccountType("pharmacy")}
-              >
-                Pharmacy
-              </button>
-            </div>
-          )}
-
-          {!isLogin && (
             <input
               name="fullName"
               value={form.fullName}
@@ -113,40 +135,12 @@ function LoginRegister() {
             />
           )}
 
-          {!isLogin && accountType === "pharmacy" && (
-            <>
-              <input
-                name="pharmacyName"
-                value={form.pharmacyName}
-                onChange={handleChange}
-                placeholder="Pharmacy Name"
-                required
-              />
-
-              <input
-                name="address"
-                value={form.address}
-                onChange={handleChange}
-                placeholder="Pharmacy Address"
-                required
-              />
-
-              <input
-                name="whatsapp"
-                value={form.whatsapp}
-                onChange={handleChange}
-                placeholder="WhatsApp Number"
-                required
-              />
-            </>
-          )}
-
           <input
             name="email"
             value={form.email}
             onChange={handleChange}
-            type="email"
-            placeholder="Email Address"
+            type={isLogin ? "text" : "email"}
+            placeholder={isLogin ? "Email or Pharmacy Username" : "Email Address"}
             required
           />
 
@@ -160,8 +154,13 @@ function LoginRegister() {
           />
 
           <button className="submit-btn" type="submit">
-            {isLogin ? "Login" : "Create Account"}
+            {isLogin ? "Login" : "Create User Account"}
           </button>
+
+          <p className="auth-hint">
+            Dashboard admin login is separated from this page. Open Dashboard
+            from the navbar.
+          </p>
         </form>
       </div>
     </main>

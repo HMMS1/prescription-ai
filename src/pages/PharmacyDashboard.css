@@ -1,71 +1,46 @@
-.dashboard-page {
+.super-admin-page {
   min-height: 100vh;
   padding: 65px 7%;
+  color: white;
 }
 
-.dashboard-header {
+.super-admin-header {
   margin-bottom: 36px;
 }
 
-.dashboard-header h1 {
+.super-admin-header span {
+  display: inline-flex;
+  color: var(--primary);
+  background: rgba(36, 242, 170, 0.1);
+  border: 1px solid rgba(36, 242, 170, 0.22);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 950;
+  margin-bottom: 18px;
+}
+
+.super-admin-header h1 {
   font-size: clamp(38px, 5vw, 62px);
   letter-spacing: -1.8px;
   margin-bottom: 12px;
 }
 
-.dashboard-header p {
+.super-admin-header p {
   color: var(--muted);
   font-size: 18px;
+  line-height: 1.8;
+  max-width: 850px;
 }
 
-.stats-grid {
+.admin-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-  margin-bottom: 34px;
+  grid-template-columns: 0.92fr 1.08fr;
+  gap: 28px;
+  align-items: start;
 }
 
-.stat-card {
-  position: relative;
-  overflow: hidden;
-  padding: 30px;
-  border-radius: 30px;
-  background: linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.045));
-  border: 1px solid var(--border);
-  box-shadow: 0 24px 65px rgba(0,0,0,0.24);
-  transition: 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(36,242,170,0.42);
-}
-
-.stat-card::before {
-  content: "";
-  position: absolute;
-  width: 135px;
-  height: 135px;
-  background: var(--secondary);
-  filter: blur(85px);
-  opacity: 0.13;
-  top: -45px;
-  right: -40px;
-}
-
-.stat-card h3 {
-  position: relative;
-  font-size: 44px;
-  color: var(--primary);
-  margin-bottom: 6px;
-}
-
-.stat-card p {
-  position: relative;
-  color: var(--muted);
-}
-
-.requests-box {
+.add-pharmacy-card,
+.pharmacies-admin-card {
   padding: 32px;
   border-radius: 34px;
   background: linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.045));
@@ -74,86 +49,162 @@
   backdrop-filter: blur(24px);
 }
 
-.requests-box h2 {
-  font-size: 31px;
+.add-pharmacy-card h2,
+.pharmacies-admin-card h2 {
+  font-size: 30px;
   margin-bottom: 22px;
 }
 
-.request-row {
+.input-group {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: 46px 1fr;
   align-items: center;
-  gap: 18px;
-  padding: 18px;
-  border-radius: 23px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.09);
+  gap: 12px;
   margin-bottom: 14px;
+  padding: 9px 14px;
+  border-radius: 21px;
+  background: rgba(255,255,255,0.065);
+  border: 1px solid rgba(255,255,255,0.09);
   transition: 0.25s ease;
 }
 
-.request-row:hover {
-  transform: translateX(7px);
-  background: rgba(255,255,255,0.105);
-  border-color: rgba(36,242,170,0.32);
+.input-group:hover,
+.input-group:focus-within {
+  border-color: rgba(36,242,170,0.46);
+  background: rgba(255,255,255,0.095);
+  transform: translateY(-2px);
 }
 
-.request-row > svg {
+.input-group svg {
   color: var(--primary);
-  font-size: 27px;
-  filter: drop-shadow(0 0 12px rgba(36,242,170,0.4));
+  font-size: 18px;
 }
 
-.request-row h4 {
-  margin-bottom: 4px;
+.input-group input {
+  width: 100%;
+  padding: 14px 0;
+  border: 0;
+  outline: 0;
+  color: white;
+  background: transparent;
 }
 
-.request-row p {
-  color: var(--muted);
+.input-group input::placeholder {
+  color: #8ca3b0;
 }
 
-.request-status {
-  color: var(--secondary);
-  background: rgba(33,184,255,0.1);
-  border: 1px solid rgba(33,184,255,0.22);
+.admin-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.admin-card-title h2 {
+  margin-bottom: 0;
+}
+
+.admin-card-title span {
+  color: var(--primary);
+  background: rgba(36,242,170,0.1);
+  border: 1px solid rgba(36,242,170,0.22);
   padding: 8px 13px;
   border-radius: 999px;
   font-weight: 900;
   font-size: 13px;
 }
 
-.request-actions {
+.empty-admin-state {
+  min-height: 315px;
+  border-radius: 28px;
+  border: 1px dashed rgba(36,242,170,0.45);
+  background: rgba(255,255,255,0.045);
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
 }
 
-.request-actions button {
-  width: 43px;
-  height: 43px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.08);
+.empty-admin-state svg {
+  color: var(--primary);
+  font-size: 54px;
+  margin-bottom: 18px;
+}
+
+.empty-admin-state p,
+.admin-pharmacy-row p {
+  color: var(--muted);
+}
+
+.admin-pharmacy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.admin-pharmacy-row {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 26px;
+  background: rgba(255,255,255,0.065);
+  border: 1px solid rgba(255,255,255,0.09);
   transition: 0.25s ease;
 }
 
-.request-actions button:hover {
-  transform: translateY(-4px) scale(1.08);
+.admin-pharmacy-row:hover {
+  transform: translateY(-5px);
+  border-color: rgba(36,242,170,0.38);
+  background: rgba(255,255,255,0.095);
 }
 
-.accept svg {
+.admin-pharmacy-row h3 {
+  font-size: 23px;
+  margin-bottom: 7px;
+}
+
+.admin-pharmacy-row p {
+  margin-bottom: 6px;
+  line-height: 1.6;
+}
+
+.admin-pharmacy-row span,
+.admin-pharmacy-row small {
+  display: inline-flex;
+  margin-top: 8px;
+  margin-right: 8px;
   color: var(--primary);
+  background: rgba(36,242,170,0.1);
+  border: 1px solid rgba(36,242,170,0.22);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 850;
 }
 
-.reject svg {
+.delete-pharmacy-btn {
+  min-width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
   color: var(--danger);
+  cursor: pointer;
+  transition: 0.25s ease;
 }
 
-@media (max-width: 900px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
+.delete-pharmacy-btn:hover {
+  transform: translateY(-4px) scale(1.08);
+  background: rgba(255, 87, 87, 0.14);
+}
 
-  .request-row {
+@media (max-width: 1000px) {
+  .admin-grid {
     grid-template-columns: 1fr;
   }
 }
