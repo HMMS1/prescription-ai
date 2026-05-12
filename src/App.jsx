@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import LoginRegister from "./pages/LoginRegister";
 import UploadPrescription from "./pages/UploadPrescription";
 import Pharmacies from "./pages/Pharmacies";
+import PharmacyDashboard from "./pages/PharmacyDashboard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import AddPharmacy from "./pages/AddPharmacy";
 import ContractedPharmacies from "./pages/ContractedPharmacies";
@@ -20,16 +21,9 @@ function App() {
       <Navbar />
 
       <Routes>
-        <Route path="/auth" element={<LoginRegister />} />
+        <Route path="/" element={<Home />} />
 
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/auth" element={<LoginRegister />} />
 
         <Route
           path="/upload"
@@ -52,7 +46,7 @@ function App() {
         <Route
           path="/contracted-pharmacies"
           element={
-            <ProtectedRoute allowDashboard>
+            <ProtectedRoute>
               <ContractedPharmacies />
             </ProtectedRoute>
           }
@@ -61,16 +55,32 @@ function App() {
         <Route
           path="/chat/:pharmacyId"
           element={
-            <ProtectedRoute allowDashboard>
+            <ProtectedRoute>
               <ChatPage />
             </ProtectedRoute>
           }
         />
 
-        <Route path="/super-admin" element={<SuperAdminDashboard />} />
+        <Route
+          path="/pharmacy-dashboard"
+          element={
+            <ProtectedRoute>
+              <PharmacyDashboard />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
-          path="/super-admin/add-pharmacy"
+          path="/dashboard"
+          element={
+            <AdminDashboardRoute>
+              <SuperAdminDashboard />
+            </AdminDashboardRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/add-pharmacy"
           element={
             <AdminDashboardRoute>
               <AddPharmacy />
@@ -78,8 +88,8 @@ function App() {
           }
         />
 
-        <Route path="/chat" element={<Navigate to="/contracted-pharmacies" replace />} />
-        <Route path="/pharmacy-dashboard" element={<Navigate to="/super-admin" replace />} />
+        <Route path="/super-admin" element={<Navigate to="/dashboard" replace />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
