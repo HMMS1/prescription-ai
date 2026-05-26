@@ -1,5 +1,5 @@
 import { useState } from "react";
-import api from "./api"; // استيراد الـ api الموحد اللي عدلناه
+import api from "../api/api"; // استيراد الـ api الموحد
 
 import "./AddPharmacy.css";
 
@@ -17,41 +17,33 @@ const AddPharmacy = () => {
     is_contracted: true,
   });
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-
-    const {
-      name,
-      value,
-      type,
-      checked,
-    } = e.target;
-
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]:
-        type === "checkbox"
-          ? checked
-          : value,
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
 
-    try {
+    // نتأكد إن الأدمن مسجل دخول قبل ما يبعت الطلب
+    const adminToken = localStorage.getItem("admin_token");
+    if (!adminToken) {
+      alert("Please login to dashboard first");
+      return;
+    }
 
+    try {
       setLoading(true);
 
-      // بنستخدم api الموحد، فمش محتاجين نبعت الـ full URL ولا الـ headers يدوياً
+      // الـ api ده هو اللي بيحط التوكن في الهيدر أوتوماتيك
       await api.post("/pharmacies/", formData);
 
-      alert(
-        "Pharmacy Added Successfully"
-      );
+      alert("Pharmacy Added Successfully");
 
       setFormData({
         name: "",
@@ -66,46 +58,28 @@ const AddPharmacy = () => {
       });
 
     } catch (error) {
-
       console.log(error);
-
       alert(
-        error.response?.data?.error ||
+        error.response?.data?.error || 
+        error.response?.data?.detail || 
         "Something went wrong"
       );
-
     } finally {
-
       setLoading(false);
     }
   };
 
   return (
-
     <div className="add-pharmacy-page">
-
       <div className="add-pharmacy-card">
-
         <div className="header-section">
-
-          <h2>
-            Add Pharmacy
-          </h2>
-
-          <p>
-            Create pharmacy account
-          </p>
-
+          <h2>Add Pharmacy</h2>
+          <p>Create pharmacy account</p>
         </div>
 
         <form onSubmit={handleSubmit}>
-
           <div className="input-group">
-
-            <label>
-              Pharmacy Name
-            </label>
-
+            <label>Pharmacy Name</label>
             <input
               type="text"
               name="name"
@@ -114,15 +88,10 @@ const AddPharmacy = () => {
               onChange={handleChange}
               required
             />
-
           </div>
 
           <div className="input-group">
-
-            <label>
-              Owner Name
-            </label>
-
+            <label>Owner Name</label>
             <input
               type="text"
               name="owner_name"
@@ -131,17 +100,11 @@ const AddPharmacy = () => {
               onChange={handleChange}
               required
             />
-
           </div>
 
           <div className="row">
-
             <div className="input-group">
-
-              <label>
-                Phone
-              </label>
-
+              <label>Phone</label>
               <input
                 type="text"
                 name="phone"
@@ -150,15 +113,10 @@ const AddPharmacy = () => {
                 onChange={handleChange}
                 required
               />
-
             </div>
 
             <div className="input-group">
-
-              <label>
-                Whatsapp
-              </label>
-
+              <label>Whatsapp</label>
               <input
                 type="text"
                 name="whatsapp"
@@ -167,17 +125,11 @@ const AddPharmacy = () => {
                 onChange={handleChange}
                 required
               />
-
             </div>
-
           </div>
 
           <div className="input-group">
-
-            <label>
-              Address
-            </label>
-
+            <label>Address</label>
             <textarea
               name="address"
               placeholder="Enter address"
@@ -185,21 +137,13 @@ const AddPharmacy = () => {
               onChange={handleChange}
               required
             />
-
           </div>
 
-          <div className="section-title">
-            Account Information
-          </div>
+          <div className="section-title">Account Information</div>
 
           <div className="row">
-
             <div className="input-group">
-
-              <label>
-                Username
-              </label>
-
+              <label>Username</label>
               <input
                 type="text"
                 name="username"
@@ -208,15 +152,10 @@ const AddPharmacy = () => {
                 onChange={handleChange}
                 required
               />
-
             </div>
 
             <div className="input-group">
-
-              <label>
-                Email
-              </label>
-
+              <label>Email</label>
               <input
                 type="email"
                 name="email"
@@ -224,17 +163,11 @@ const AddPharmacy = () => {
                 value={formData.email}
                 onChange={handleChange}
               />
-
             </div>
-
           </div>
 
           <div className="input-group">
-
-            <label>
-              Password
-            </label>
-
+            <label>Password</label>
             <input
               type="password"
               name="password"
@@ -243,43 +176,23 @@ const AddPharmacy = () => {
               onChange={handleChange}
               required
             />
-
           </div>
 
           <div className="checkbox-wrapper">
-
             <input
               type="checkbox"
               name="is_contracted"
-              checked={
-                formData.is_contracted
-              }
+              checked={formData.is_contracted}
               onChange={handleChange}
             />
-
-            <span>
-              Contracted Pharmacy
-            </span>
-
+            <span>Contracted Pharmacy</span>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-          >
-
-            {
-              loading
-                ? "Adding..."
-                : "Add Pharmacy"
-            }
-
+          <button type="submit" disabled={loading}>
+            {loading ? "Adding..." : "Add Pharmacy"}
           </button>
-
         </form>
-
       </div>
-
     </div>
   );
 };
