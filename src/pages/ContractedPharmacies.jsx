@@ -1,70 +1,235 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { FaWhatsapp, FaPhoneAlt, FaMapMarkerAlt, FaComments, FaUserMd } from "react-icons/fa";
+
+import { useNavigate } from "react-router-dom";
+
+import {
+  FaWhatsapp,
+  FaPhoneAlt,
+  FaMapMarkerAlt,
+  FaUserMd,
+  FaComments,
+  FaUser
+} from "react-icons/fa";
+
+import api from "../api/api";
+
 import "./ContractedPharmacies.css";
 
 function ContractedPharmacies() {
-  const [pharmacies, setPharmacies] = useState([]);
+
+  const [items, setItems] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const navigate = useNavigate();
+
+  const role =
+    localStorage.getItem("role");
 
   useEffect(() => {
-    setPharmacies(JSON.parse(localStorage.getItem("contractedPharmacies") || "[]"));
-  }, []);
+
+    // لو Pharmacy
+    if (role === "pharmacy") {
+
+      api
+        .get(
+          "/pharmacies/pharmacy-conversations/"
+        )
+        .then((res) => {
+
+          setItems(res.data);
+
+        })
+        .catch((err) => {
+
+          console.log(err);
+
+        })
+        .finally(() => {
+
+          setLoading(false);
+
+        });
+
+    }
+
+    // لو User
+    else {
+
+      api
+        .get(
+          "/pharmacies/contracted/"
+        )
+        .then((res) => {
+
+          setItems(
+            res.data.results || res.data
+          );
+
+        })
+        .catch((err) => {
+
+          console.log(err);
+
+        })
+        .finally(() => {
+
+          setLoading(false);
+
+        });
+
+    }
+
+  }, [role]);
 
   return (
+
     <main className="contracted-page">
+
       <section className="contracted-header">
-        <span>Trusted Partners</span>
-        <h1>Contracted Pharmacies</h1>
-        <p>
-          These pharmacies are registered by MediScan AI. You can chat with them directly
-          about your prescription availability before visiting.
-        </p>
+
+        <span>
+
+          {role === "pharmacy"
+            ? "Users"
+            : "Trusted Partners"}
+
+        </span>
+
+        <h1>
+
+          {role === "pharmacy"
+            ? "Users Conversations"
+            : "Contracted Pharmacies"}
+
+        </h1>
+
       </section>
 
-      {pharmacies.length === 0 ? (
+      {loading ? (
+
         <section className="contracted-empty">
-          <FaMapMarkerAlt />
-          <h3>No contracted pharmacies added yet</h3>
-          <p>The Super Admin should add pharmacies first.</p>
+          <p>Loading...</p>
         </section>
+
+      ) : items.length === 0 ? (
+
+        <section className="contracted-empty">
+          <h3>No Data</h3>
+        </section>
+
       ) : (
+
         <section className="contracted-grid">
-          {pharmacies.map((pharmacy) => (
-            <article className="contracted-card" key={pharmacy.id}>
-              <div className="contracted-icon">
-                <FaUserMd />
-              </div>
 
-              <h3>{pharmacy.pharmacyName}</h3>
-              <p className="doctor-name">Dr. {pharmacy.doctorName}</p>
-              <p className="address">
-                <FaMapMarkerAlt /> {pharmacy.address}
-              </p>
+          {role === "pharmacy"
 
-              <span className="phone-pill">{pharmacy.phone}</span>
+            ? items.map((user) => (
 
-              <div className="contracted-actions">
-                <Link to={`/chat/${pharmacy.id}`} className="chat-action">
-                  <FaComments /> Chat
-                </Link>
-
-                <a href={`tel:${pharmacy.phone}`} title="Call pharmacy">
-                  <FaPhoneAlt />
-                </a>
-
-                <a
-                  href={`https://wa.me/${pharmacy.phone.replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  title="Open WhatsApp"
+                <article
+                  className="contracted-card"
+                  key={user.user_id}
                 >
-                  <FaWhatsapp />
-                </a>
-              </div>
-            </article>
-          ))}
+
+                  <div className="contracted-icon">
+                    <FaUser />
+                  </div>
+
+                  <h3>
+                    {user.username}
+                  </h3>
+
+                  <p className="doctor-name">
+                    User Account
+                  </p>
+
+                  <div
+                    className="contracted-actions"
+                  >
+
+                    <button
+                      onClick={() =>
+                        navigate(
+                          `/pharmacy-chat/${user.user_id}`
+                        )
+                      }
+                    >
+                      <FaComments />
+                    </button>
+
+                  </div>
+
+                </article>
+
+              ))
+
+            : items.map((pharmacy) => (
+
+                <article
+                  className="contracted-card"
+                  key={pharmacy.id}
+                >
+
+                  <div className="contracted-icon">
+                    <FaUserMd />
+                  </div>
+
+                  <h3>
+                    {pharmacy.name}
+                  </h3>
+
+                  <p className="doctor-name">
+                    {pharmacy.owner_name}
+                  </p>
+
+                  <p className="address">
+                    <FaMapMarkerAlt />
+
+                    {pharmacy.address}
+                  </p>
+
+                  <span className="phone-pill">
+                    {pharmacy.phone}
+                  </span>
+
+                  <div className="contracted-actions">
+
+                    <a
+                      href={`tel:${pharmacy.phone}`}
+                    >
+                      <FaPhoneAlt />
+                    </a>
+
+                    <a
+                      href={`https://wa.me/${pharmacy.whatsapp}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <FaWhatsapp />
+                    </a>
+
+                    <button
+                      onClick={() =>
+                        navigate(
+                          `/chat/${pharmacy.id}`
+                        )
+                      }
+                    >
+                      <FaComments />
+                    </button>
+
+                  </div>
+
+                </article>
+
+              ))}
+
         </section>
+
       )}
+
     </main>
   );
 }

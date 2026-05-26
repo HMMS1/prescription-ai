@@ -1,231 +1,313 @@
-import { useEffect, useState } from "react";
-import {
-  FaClinicMedical,
-  FaUserMd,
-  FaMapMarkerAlt,
-  FaPhoneAlt,
-  FaLock,
-  FaTrash,
-  FaPlusCircle,
-  FaEnvelope,
-} from "react-icons/fa";
-import "./SuperAdminDashboard.css";
+import { useState } from "react";
+import axios from "axios";
 
-function AddPharmacy() {
-  const [pharmacies, setPharmacies] = useState([]);
-  const [form, setForm] = useState({
-    doctorName: "",
-    pharmacyName: "",
-    address: "",
+import "./AddPharmacy.css";
+
+const AddPharmacy = () => {
+
+  const [formData, setFormData] = useState({
+    name: "",
+    owner_name: "",
     phone: "",
+    whatsapp: "",
+    address: "",
     username: "",
     email: "",
     password: "",
+    is_contracted: true,
   });
 
-  useEffect(() => {
-    setPharmacies(JSON.parse(localStorage.getItem("contractedPharmacies") || "[]"));
-  }, []);
+  const [loading, setLoading] =
+    useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
-  const resetForm = () => {
-    setForm({
-      doctorName: "",
-      pharmacyName: "",
-      address: "",
-      phone: "",
-      username: "",
-      email: "",
-      password: "",
+    const {
+      name,
+      value,
+      type,
+      checked,
+    } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
     });
   };
 
-  const savePharmacies = (items) => {
-    localStorage.setItem("contractedPharmacies", JSON.stringify(items));
-    setPharmacies(items);
-  };
+  const handleSubmit = async (e) => {
 
-  const handleSubmit = (e) => {
     e.preventDefault();
 
-    const exists = pharmacies.some(
-      (pharmacy) =>
-        pharmacy.username === form.username ||
-        (form.email && pharmacy.email === form.email) ||
-        pharmacy.phone === form.phone
-    );
+    try {
 
-    if (exists) {
-      alert("This pharmacy username/email/phone already exists");
-      return;
+      setLoading(true);
+
+      // مهم جدًا
+      // توكن الأدمن فقط
+      const token =
+        localStorage.getItem(
+          "dashboard_token"
+        );
+
+      if (!token) {
+
+        alert(
+          "Please login to dashboard first"
+        );
+
+        setLoading(false);
+
+        return;
+      }
+
+      await axios.post(
+        "http://127.0.0.1:8000/api/v1/pharmacies/",
+        formData,
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert(
+        "Pharmacy Added Successfully"
+      );
+
+      setFormData({
+        name: "",
+        owner_name: "",
+        phone: "",
+        whatsapp: "",
+        address: "",
+        username: "",
+        email: "",
+        password: "",
+        is_contracted: true,
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert(
+        error.response?.data?.error ||
+        "Something went wrong"
+      );
+
+    } finally {
+
+      setLoading(false);
     }
-
-    const newPharmacy = {
-      id: Date.now(),
-      doctorName: form.doctorName,
-      pharmacyName: form.pharmacyName,
-      address: form.address,
-      phone: form.phone,
-      whatsapp: form.phone,
-      username: form.username,
-      email: form.email,
-      password: form.password,
-      role: "pharmacy",
-      createdAt: new Date().toISOString(),
-    };
-
-    savePharmacies([newPharmacy, ...pharmacies]);
-    resetForm();
-  };
-
-  const deletePharmacy = (id) => {
-    const updated = pharmacies.filter((pharmacy) => pharmacy.id !== id);
-    savePharmacies(updated);
   };
 
   return (
-    <main className="super-admin-page">
-      <section className="super-admin-header centered-admin-header">
-        <span>
-          <FaPlusCircle /> Add Pharmacy
-        </span>
-        <h1>Add Contracted Pharmacy</h1>
-        <p>
-          Create pharmacy login credentials and keep the registered pharmacies visible
-          beside the form so you always know what has already been added.
-        </p>
-      </section>
 
-      <section className="admin-grid">
-        <form className="add-pharmacy-card" onSubmit={handleSubmit}>
-          <h2>Pharmacy Data</h2>
+    <div className="add-pharmacy-page">
+
+      <div className="add-pharmacy-card">
+
+        <div className="header-section">
+
+          <h2>
+            Add Pharmacy
+          </h2>
+
+          <p>
+            Create pharmacy account
+          </p>
+
+        </div>
+
+        <form onSubmit={handleSubmit}>
 
           <div className="input-group">
-            <FaUserMd />
+
+            <label>
+              Pharmacy Name
+            </label>
+
             <input
-              name="doctorName"
-              value={form.doctorName}
+              type="text"
+              name="name"
+              placeholder="Enter pharmacy name"
+              value={formData.name}
               onChange={handleChange}
-              placeholder="Doctor Name"
               required
             />
+
           </div>
 
           <div className="input-group">
-            <FaClinicMedical />
+
+            <label>
+              Owner Name
+            </label>
+
             <input
-              name="pharmacyName"
-              value={form.pharmacyName}
+              type="text"
+              name="owner_name"
+              placeholder="Enter owner name"
+              value={formData.owner_name}
               onChange={handleChange}
-              placeholder="Pharmacy Name"
               required
             />
+
+          </div>
+
+          <div className="row">
+
+            <div className="input-group">
+
+              <label>
+                Phone
+              </label>
+
+              <input
+                type="text"
+                name="phone"
+                placeholder="Phone number"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+              />
+
+            </div>
+
+            <div className="input-group">
+
+              <label>
+                Whatsapp
+              </label>
+
+              <input
+                type="text"
+                name="whatsapp"
+                placeholder="Whatsapp number"
+                value={formData.whatsapp}
+                onChange={handleChange}
+                required
+              />
+
+            </div>
+
           </div>
 
           <div className="input-group">
-            <FaMapMarkerAlt />
-            <input
+
+            <label>
+              Address
+            </label>
+
+            <textarea
               name="address"
-              value={form.address}
+              placeholder="Enter address"
+              value={formData.address}
               onChange={handleChange}
-              placeholder="Address"
               required
             />
+
+          </div>
+
+          <div className="section-title">
+            Account Information
+          </div>
+
+          <div className="row">
+
+            <div className="input-group">
+
+              <label>
+                Username
+              </label>
+
+              <input
+                type="text"
+                name="username"
+                placeholder="Create username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
+
+            </div>
+
+            <div className="input-group">
+
+              <label>
+                Email
+              </label>
+
+              <input
+                type="email"
+                name="email"
+                placeholder="Optional"
+                value={formData.email}
+                onChange={handleChange}
+              />
+
+            </div>
+
           </div>
 
           <div className="input-group">
-            <FaPhoneAlt />
-            <input
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              placeholder="Phone / WhatsApp Number"
-              required
-            />
-          </div>
 
-          <div className="input-group">
-            <FaLock />
-            <input
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              placeholder="Pharmacy Username"
-              required
-            />
-          </div>
+            <label>
+              Password
+            </label>
 
-          <div className="input-group">
-            <FaEnvelope />
             <input
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              type="email"
-              placeholder="Pharmacy Email (optional but recommended)"
-            />
-          </div>
-
-          <div className="input-group">
-            <FaLock />
-            <input
-              name="password"
-              value={form.password}
-              onChange={handleChange}
               type="password"
-              placeholder="Pharmacy Password"
+              name="password"
+              placeholder="Create password"
+              value={formData.password}
+              onChange={handleChange}
               required
             />
+
           </div>
 
-          <button className="premium-btn" type="submit">
-            <FaPlusCircle /> Add Pharmacy Account
+          <div className="checkbox-wrapper">
+
+            <input
+              type="checkbox"
+              name="is_contracted"
+              checked={
+                formData.is_contracted
+              }
+              onChange={handleChange}
+            />
+
+            <span>
+              Contracted Pharmacy
+            </span>
+
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+          >
+
+            {
+              loading
+                ? "Adding..."
+                : "Add Pharmacy"
+            }
+
           </button>
+
         </form>
 
-        <div className="pharmacies-admin-card">
-          <div className="admin-card-title">
-            <h2>Registered Pharmacies</h2>
-            <span>{pharmacies.length} pharmacies</span>
-          </div>
+      </div>
 
-          {pharmacies.length === 0 ? (
-            <div className="empty-admin-state">
-              <FaClinicMedical />
-              <h3>No pharmacies yet</h3>
-              <p>Add your first contracted pharmacy from the form.</p>
-            </div>
-          ) : (
-            <div className="admin-pharmacy-list">
-              {pharmacies.map((pharmacy) => (
-                <div className="admin-pharmacy-row" key={pharmacy.id}>
-                  <div>
-                    <h3>{pharmacy.pharmacyName}</h3>
-                    <p>Dr. {pharmacy.doctorName}</p>
-                    <p>{pharmacy.address}</p>
-                    <span>{pharmacy.phone}</span>
-                    <small>Login: {pharmacy.username}</small>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="delete-pharmacy-btn"
-                    onClick={() => deletePharmacy(pharmacy.id)}
-                    title="Delete pharmacy"
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-    </main>
+    </div>
   );
-}
+};
 
 export default AddPharmacy;

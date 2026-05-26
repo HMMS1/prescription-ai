@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import { Link } from "react-router-dom";
+
 import {
   FaPlusCircle,
   FaClinicMedical,
@@ -10,151 +12,478 @@ import {
   FaLock,
   FaUserShield,
 } from "react-icons/fa";
+
+import api from "../api/api";
+
 import "./SuperAdminDashboard.css";
 
+
+// ======================================================
+// DASHBOARD LOGIN
+// ======================================================
+
 function DashboardLogin({ onLogin }) {
-  const [form, setForm] = useState({ username: "", password: "" });
+
+  const [form, setForm] =
+    useState({
+      username: "",
+      password: "",
+    });
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+
+    setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+
     e.preventDefault();
 
-    // Temporary frontend-only login.
-    // Any username/password will work until backend authentication is connected.
-    localStorage.setItem("dashboardAuth", "true");
-    localStorage.setItem(
-      "dashboardUser",
-      JSON.stringify({ username: form.username || "dashboard-admin", role: "superadmin" })
-    );
-    onLogin();
+    try {
+
+      setLoading(true);
+
+      const res = await api.post(
+        "/auth/login/",
+        {
+          username: form.username,
+          password: form.password,
+        }
+      );
+
+      const access =
+        res.data.access;
+
+      const refresh =
+        res.data.refresh;
+
+      let payload = {};
+
+      try {
+
+        payload = JSON.parse(
+          atob(
+            access.split(".")[1]
+          )
+        );
+
+      } catch (err) {}
+
+      if (
+        payload.role !== "admin"
+      ) {
+
+        setError(
+          "Admin accounts only"
+        );
+
+        setLoading(false);
+
+        return;
+      }
+
+      // save admin token
+      localStorage.setItem(
+        "admin_token",
+        access
+      );
+
+      localStorage.setItem(
+        "admin_refresh",
+        refresh || ""
+      );
+
+      localStorage.setItem(
+        "dashboardAuth",
+        "true"
+      );
+
+      localStorage.setItem(
+        "dashboardUser",
+        JSON.stringify({
+          username:
+            form.username,
+
+          role: "admin",
+        })
+      );
+
+      // remove user auth
+      localStorage.removeItem(
+        "token"
+      );
+
+      localStorage.removeItem(
+        "refresh"
+      );
+
+      localStorage.removeItem(
+        "user"
+      );
+
+      localStorage.removeItem(
+        "role"
+      );
+
+      onLogin();
+
+    } catch (err) {
+
+      console.log(err);
+
+      setError(
+        "Invalid username or password"
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
   };
 
   return (
+
     <main className="super-admin-page dashboard-login-page">
+
       <section className="dashboard-login-shell">
+
         <div className="dashboard-login-copy">
+
           <span className="super-admin-badge">
-            <FaShieldAlt /> Dashboard Area
+            <FaShieldAlt />
+            Dashboard Area
           </span>
-          <h1>Dashboard Login</h1>
+
+          <h1>
+            Dashboard Login
+          </h1>
+
           <p>
-            This login is separated from the normal user login. For now, write any
-            username and password to enter. Backend will validate real credentials later.
+            Admin accounts only.
           </p>
+
         </div>
 
-        <form className="dashboard-login-card" onSubmit={handleSubmit}>
+        <form
+          className="dashboard-login-card"
+          onSubmit={handleSubmit}
+        >
+
           <div className="dashboard-login-icon">
             <FaUserShield />
           </div>
 
-          <h2>Super Admin Access</h2>
+          <h2>
+            Admin Access
+          </h2>
 
           <div className="input-group">
+
             <FaUserShield />
+
             <input
               name="username"
               value={form.username}
               onChange={handleChange}
-              placeholder="Write any username"
+              placeholder="Admin Username"
               required
             />
+
           </div>
 
           <div className="input-group">
+
             <FaLock />
+
             <input
               name="password"
               value={form.password}
               onChange={handleChange}
               type="password"
-              placeholder="Write any password"
+              placeholder="Admin Password"
               required
             />
+
           </div>
 
-          <button className="premium-btn" type="submit">
-            Enter Dashboard
+          {error && (
+
+            <p
+              style={{
+                color: "#ff6b6b",
+                marginTop: "10px",
+              }}
+            >
+              {error}
+            </p>
+
+          )}
+
+          <button
+            className="premium-btn"
+            type="submit"
+            disabled={loading}
+          >
+
+            {loading
+              ? "Logging..."
+              : "Enter Dashboard"}
+
           </button>
+
         </form>
+
       </section>
+
     </main>
   );
 }
 
+
+// ======================================================
+// MAIN DASHBOARD
+// ======================================================
+
 function SuperAdminDashboard() {
-  const [isDashboardLoggedIn, setIsDashboardLoggedIn] = useState(
-    localStorage.getItem("dashboardAuth") === "true"
-  );
+
+  const [isDashboardLoggedIn,
+    setIsDashboardLoggedIn] =
+    useState(
+      localStorage.getItem(
+        "dashboardAuth"
+      ) === "true"
+    );
+
+  const [stats, setStats] =
+    useState(null);
+
+  const [latestPharmacy,
+    setLatestPharmacy] =
+    useState(null);
+
+  useEffect(() => {
+
+    if (!isDashboardLoggedIn)
+      return;
+
+    api.get(
+      "/auth/dashboard-stats/"
+    )
+    .then((res) => {
+
+      setStats(res.data);
+
+    });
+
+    api.get(
+      "/pharmacies/?ordering=-created_at"
+    )
+    .then((res) => {
+
+      const results =
+        res.data.results ||
+        res.data;
+
+      if (results.length > 0) {
+
+        setLatestPharmacy(
+          results[0]
+        );
+      }
+
+    });
+
+  }, [isDashboardLoggedIn]);
+
+  const handleLogout = () => {
+
+    localStorage.removeItem(
+      "admin_token"
+    );
+
+    localStorage.removeItem(
+      "admin_refresh"
+    );
+
+    localStorage.removeItem(
+      "dashboardAuth"
+    );
+
+    localStorage.removeItem(
+      "dashboardUser"
+    );
+
+    window.location.reload();
+  };
 
   if (!isDashboardLoggedIn) {
-    return <DashboardLogin onLogin={() => setIsDashboardLoggedIn(true)} />;
+
+    return (
+      <DashboardLogin
+        onLogin={() =>
+          setIsDashboardLoggedIn(true)
+        }
+      />
+    );
   }
 
-  const pharmacies = JSON.parse(localStorage.getItem("contractedPharmacies") || "[]");
-  const latest = pharmacies[0];
-
   return (
+
     <main className="super-admin-page dashboard-only-page">
+
       <section className="super-admin-hero">
+
         <div className="hero-orb one"></div>
+
         <div className="hero-orb two"></div>
 
         <div className="super-admin-copy">
+
           <span className="super-admin-badge">
-            <FaShieldAlt /> Super Admin Control
+
+            <FaShieldAlt />
+
+            Super Admin Control
+
           </span>
 
-          <h1>Dashboard</h1>
+          <h1>
+            Dashboard
+          </h1>
+
           <p>
-            The dashboard is separated from the normal Login/Register page. Add contracted
-            pharmacies here, then view them directly from Contracted Pharmacies.
+            Manage pharmacies.
           </p>
 
           <div className="super-admin-actions">
-            <Link to="/super-admin/add-pharmacy" className="add-pharmacy-main-btn">
-              <FaPlusCircle /> Add Pharmacy
+
+            <Link
+              to="/super-admin/add-pharmacy"
+              className="add-pharmacy-main-btn"
+            >
+
+              <FaPlusCircle />
+
+              Add Pharmacy
+
             </Link>
 
-            <Link to="/contracted-pharmacies" className="ghost-admin-btn">
-              <FaComments /> View Contracted Pharmacies
+            <Link
+              to="/contracted-pharmacies"
+              className="ghost-admin-btn"
+            >
+
+              <FaComments />
+
+              Pharmacies
+
             </Link>
+
+            <button
+              className="ghost-admin-btn"
+              onClick={handleLogout}
+            >
+
+              Logout
+
+            </button>
+
           </div>
+
         </div>
 
         <aside className="dashboard-side-card">
+
           <div className="side-card-header">
+
             <div>
-              <span>Current Status</span>
-              <h2>{pharmacies.length}</h2>
-              <p>registered pharmacies</p>
+
+              <span>
+                Current Status
+              </span>
+
+              <h2>
+                {stats
+                  ? stats.pharmacies_count
+                  : "..."}
+              </h2>
+
+              <p>
+                pharmacies
+              </p>
+
             </div>
+
             <FaClinicMedical />
+
           </div>
 
-          {latest ? (
+          {latestPharmacy ? (
+
             <div className="latest-pharmacy-mini">
-              <span>Latest Added</span>
-              <h3>{latest.pharmacyName}</h3>
-              <p>Dr. {latest.doctorName}</p>
-              <small><FaMapMarkerAlt /> {latest.address}</small>
+
+              <span>
+                Latest Added
+              </span>
+
+              <h3>
+                {latestPharmacy.name}
+              </h3>
+
+              <p>
+                {latestPharmacy.owner_name}
+              </p>
+
+              <small>
+
+                <FaMapMarkerAlt />
+
+                {" "}
+
+                {latestPharmacy.address}
+
+              </small>
+
             </div>
+
           ) : (
+
             <div className="latest-pharmacy-mini empty">
-              <span>No data yet</span>
-              <h3>Add your first pharmacy</h3>
-              <p>The list will start appearing after adding pharmacy accounts.</p>
+
+              <span>
+                No data yet
+              </span>
+
             </div>
+
           )}
 
-          <Link to="/super-admin/add-pharmacy" className="mini-arrow-link">
-            Start adding now <FaArrowRight />
+          <Link
+            to="/super-admin/add-pharmacy"
+            className="mini-arrow-link"
+          >
+
+            Start adding now
+
+            <FaArrowRight />
+
           </Link>
+
         </aside>
+
       </section>
+
     </main>
   );
 }

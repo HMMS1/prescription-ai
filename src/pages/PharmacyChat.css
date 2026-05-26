@@ -1,0 +1,248 @@
+/* ================== تصميم الشات الزجاجي الاحترافي ================== */
+
+.pharmacy-chat-container {
+  min-height: calc(100vh - 80px);
+  padding: 30px 5%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.chat-wrapper {
+  width: 100%;
+  max-width: 850px;
+  height: 80vh;
+  min-height: 600px;
+  background: rgba(12, 18, 25, 0.7); /* لون داكن شفاف */
+  border: 1px solid rgba(36, 242, 170, 0.15); /* حدود خضراء نيون خفيفة */
+  border-radius: 28px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  backdrop-filter: blur(16px); /* تأثير الزجاج المضبب */
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* توهج خلفي هادئ */
+.chat-wrapper::before {
+  content: "";
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: var(--primary);
+  filter: blur(120px);
+  opacity: 0.1;
+  top: -80px;
+  left: -80px;
+  pointer-events: none;
+}
+
+/* ================== الهيدر ================== */
+.chat-main-header {
+  position: relative;
+  z-index: 1;
+  padding: 20px 32px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(36, 242, 170, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: 0.3s !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.back-btn:hover {
+  background: var(--primary) !important;
+  color: #000 !important;
+  transform: translateX(-3px) !important;
+}
+
+.chat-avatar-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  background: rgba(36, 242, 170, 0.1);
+  border: 1px solid rgba(36, 242, 170, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  font-size: 22px;
+}
+
+.chat-header-text h2 {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 5px 0;
+}
+
+.chat-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--primary);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--primary);
+}
+
+/* ================== جسم الشات والفقاعات ================== */
+.chat-messages-box {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* سكرول بار أنيق */
+.chat-messages-box::-webkit-scrollbar { width: 6px; }
+.chat-messages-box::-webkit-scrollbar-track { background: transparent; }
+.chat-messages-box::-webkit-scrollbar-thumb { background: rgba(36, 242, 170, 0.2); border-radius: 10px; }
+.chat-messages-box::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+.msg-row {
+  display: flex;
+  flex-direction: column;
+  max-width: 75%;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* رسائلك إنت (يمين) */
+.user-side {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+/* رسائل الطرف التاني (شمال) */
+.pharmacy-side {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.msg-sender {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 6px;
+  padding: 0 8px;
+  font-weight: 700;
+}
+
+.msg-bubble {
+  padding: 14px 20px;
+  border-radius: 20px;
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+/* رسائل الطرف التاني (زجاج رمادي) */
+.pharmacy-side .msg-bubble {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  border-top-left-radius: 4px; /* لكسر الدوران من جهة المتحدث */
+}
+
+/* رسائلك إنت (أخضر نيون) */
+.user-side .msg-bubble {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #010a0f;
+  border-top-right-radius: 4px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(36, 242, 170, 0.2);
+}
+
+/* ================== شريط الكتابة (الحل الجذري للمشكلة البصرية) ================== */
+form.chat-input-bar {
+  padding: 20px 32px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-top: 1px solid rgba(36, 242, 170, 0.15) !important;
+  display: flex !important;
+  flex-direction: row !important; /* إجباري جنب بعض */
+  align-items: center !important;
+  gap: 15px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+form.chat-input-bar input {
+  flex: 1 1 auto !important; /* ياخد باقي المساحة */
+  height: 52px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  padding: 0 20px !important;
+  color: white !important;
+  font-size: 15px !important;
+  transition: 0.3s ease !important;
+  outline: none !important;
+  margin: 0 !important;
+}
+
+form.chat-input-bar input:focus {
+  border-color: rgba(36, 242, 170, 0.6) !important;
+  background: rgba(36, 242, 170, 0.03) !important;
+  box-shadow: 0 0 15px rgba(36, 242, 170, 0.1) !important;
+}
+
+form.chat-input-bar button.chat-send-button {
+  flex: 0 0 auto !important; /* حجم ثابت للزرار */
+  width: auto !important;
+  min-width: 110px !important;
+  height: 52px !important;
+  border-radius: 16px !important;
+  border: none !important;
+  background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+  color: #021018 !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  transition: 0.3s ease !important;
+  margin: 0 !important;
+  padding: 0 20px !important;
+}
+
+form.chat-input-bar button.chat-send-button:hover:not(:disabled) {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 10px 25px rgba(36, 242, 170, 0.3) !important;
+}

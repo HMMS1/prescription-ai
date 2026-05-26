@@ -1,168 +1,364 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+import api from "../api/api";
+
 import "./LoginRegister.css";
 
 function LoginRegister() {
-  const navigate = useNavigate();
 
-  const [isLogin, setIsLogin] = useState(true);
-  const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-  });
+  const [isLogin, setIsLogin] =
+    useState(true);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [form, setForm] =
+    useState({
+      username: "",
+      email: "",
+      password: "",
+    });
 
   const handleChange = (e) => {
+
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     });
+
+    setError("");
   };
 
-  const getStoredUsers = () =>
-    JSON.parse(localStorage.getItem("users") || "[]");
+  // ======================
+  // REGISTER
+  // ======================
 
-  const registerUser = () => {
-    const users = getStoredUsers();
-    const alreadyExists = users.some((user) => user.email === form.email);
+  const registerUser = async () => {
 
-    if (alreadyExists) {
-      alert("This email is already registered");
-      return;
+    try {
+
+      setLoading(true);
+
+      await api.post(
+        "/auth/register/",
+        {
+          username: form.username,
+          email: form.email,
+          password: form.password,
+          role: "user",
+        }
+      );
+
+      await loginUser(
+        form.username,
+        form.password
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+      setError(
+        err.response?.data?.detail ||
+        "Registration failed"
+      );
+
+      setLoading(false);
     }
-
-    const newUser = {
-      id: Date.now(),
-      fullName: form.fullName,
-      email: form.email,
-      password: form.password,
-      role: "user",
-    };
-
-    localStorage.setItem("users", JSON.stringify([...users, newUser]));
-
-    localStorage.setItem("token", "fake-token");
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        id: newUser.id,
-        name: newUser.fullName,
-        email: newUser.email,
-        role: "user",
-      })
-    );
-    localStorage.setItem("role", "user");
-
-    navigate("/");
   };
 
-  const loginUser = () => {
-    /*
-      Temporary fake login:
-      أي Email / Username + أي Password هيدخل عادي دلوقتي كـ user.
-      لما نربط بالباك هنرجع نتحقق من البيانات الحقيقية.
-    */
+  // ======================
+  // LOGIN
+  // ======================
 
-    const loginId = form.email.trim();
+  const loginUser = async (
+    usernameOverride,
+    passwordOverride
+  ) => {
 
-    const fakeLoggedUser = {
-      id: Date.now(),
-      name: loginId || "Test User",
-      email: loginId,
-      username: loginId,
-      role: "user",
-    };
+    try {
 
-    localStorage.setItem("token", "fake-token");
-    localStorage.setItem("user", JSON.stringify(fakeLoggedUser));
-    localStorage.setItem("role", "user");
+      setLoading(true);
 
-    navigate("/");
+      const res = await api.post(
+        "/auth/login/",
+        {
+          username:
+            usernameOverride ||
+            form.username,
+
+          password:
+            passwordOverride ||
+            form.password,
+        }
+      );
+
+      console.log(
+        "LOGIN:",
+        res.data
+      );
+
+      const access =
+        res.data.access;
+
+      const refresh =
+        res.data.refresh;
+
+      if (!access) {
+
+        setError(
+          "No access token returned"
+        );
+
+        setLoading(false);
+
+        return;
+      }
+
+      // decode jwt
+      let payload = {};
+
+      try {
+
+        payload = JSON.parse(
+          atob(
+            access.split(".")[1]
+          )
+        );
+
+      } catch (err) {
+
+        console.log(err);
+      }
+
+      // لو أدمن امنعه يدخل من هنا
+      if (
+        payload.role === "admin"
+      ) {
+
+        setError(
+          "Admins must login from Dashboard page"
+        );
+
+        setLoading(false);
+
+        return;
+      }
+
+      // save user token
+      localStorage.setItem(
+        "token",
+        access
+      );
+
+      localStorage.setItem(
+        "refresh",
+        refresh || ""
+      );
+
+      // save user info
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id:
+            payload.user_id || 1,
+
+          username:
+            usernameOverride ||
+            form.username,
+
+          role:
+            payload.role ||
+            "user",
+        })
+      );
+
+      localStorage.setItem(
+        "role",
+        payload.role || "user"
+      );
+
+      // remove dashboard auth
+      localStorage.removeItem(
+        "admin_token"
+      );
+
+      localStorage.removeItem(
+        "admin_refresh"
+      );
+
+      localStorage.removeItem(
+        "dashboardAuth"
+      );
+
+      localStorage.removeItem(
+        "dashboardUser"
+      );
+
+      window.location.href = "/";
+
+    } catch (err) {
+
+      console.log(err);
+
+      setError(
+        "Invalid username or password"
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
   };
 
   const handleSubmit = (e) => {
+
     e.preventDefault();
 
     if (isLogin) {
+
       loginUser();
+
     } else {
+
       registerUser();
     }
   };
 
   return (
+
     <main className="auth-page">
+
       <div className="auth-shell">
+
         <section className="auth-brand">
+
           <div className="brand-glow"></div>
 
-          <span className="mini-badge">MediScan AI</span>
+          <span className="mini-badge">
+            MediScan AI
+          </span>
 
-          <h1>Smart medical help, faster pharmacy access.</h1>
+          <h1>
+            Smart medical help,
+            faster pharmacy access.
+          </h1>
 
           <p>
-            Users create normal accounts here. Contracted pharmacies can also
-            login here after the dashboard creates their username and password.
+            Users and pharmacies login here.
           </p>
+
         </section>
 
-        <form className="auth-panel" onSubmit={handleSubmit}>
+        <form
+          className="auth-panel"
+          onSubmit={handleSubmit}
+        >
+
           <div className="auth-tabs">
+
             <button
               type="button"
-              className={isLogin ? "active" : ""}
-              onClick={() => setIsLogin(true)}
+              className={
+                isLogin
+                  ? "active"
+                  : ""
+              }
+              onClick={() => {
+                setIsLogin(true);
+                setError("");
+              }}
             >
               Login
             </button>
 
             <button
               type="button"
-              className={!isLogin ? "active" : ""}
-              onClick={() => setIsLogin(false)}
+              className={
+                !isLogin
+                  ? "active"
+                  : ""
+              }
+              onClick={() => {
+                setIsLogin(false);
+                setError("");
+              }}
             >
               Register
             </button>
+
           </div>
 
-          {!isLogin && (
-            <input
-              name="fullName"
-              value={form.fullName}
-              onChange={handleChange}
-              placeholder="Full Name"
-              required
-            />
-          )}
-
           <input
-            name="email"
-            value={form.email}
+            name="username"
+            value={form.username}
             onChange={handleChange}
-            type={isLogin ? "text" : "email"}
-            placeholder={isLogin ? "Email or Pharmacy Username" : "Email Address"}
+            placeholder="Username"
             required
           />
 
+          {!isLogin && (
+
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Email"
+              required
+            />
+
+          )}
+
           <input
             name="password"
+            type="password"
             value={form.password}
             onChange={handleChange}
-            type="password"
             placeholder="Password"
             required
           />
 
-          <button className="submit-btn" type="submit">
-            {isLogin ? "Login" : "Create User Account"}
+          {error && (
+
+            <p
+              className="auth-error"
+              style={{
+                color: "#ff4d4d",
+                fontWeight: "bold",
+              }}
+            >
+              {error}
+            </p>
+
+          )}
+
+          <button
+            className="submit-btn"
+            type="submit"
+            disabled={loading}
+          >
+
+            {loading
+              ? "Please wait..."
+              : isLogin
+              ? "Login"
+              : "Create Account"}
+
           </button>
 
           <p className="auth-hint">
-            Dashboard admin login is separated from this page. Open Dashboard
-            from the navbar.
+            Admin login is separated
+            from dashboard page.
           </p>
+
         </form>
+
       </div>
+
     </main>
   );
 }

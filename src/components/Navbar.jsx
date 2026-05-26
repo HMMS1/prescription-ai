@@ -1,24 +1,26 @@
-import { NavLink, Link, useNavigate } from "react-router-dom";
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   FaCapsules,
   FaUser,
   FaShieldAlt,
-  FaComments,
   FaSignOutAlt,
   FaHome,
   FaCamera,
   FaMapMarkerAlt,
   FaPlusCircle,
+  FaClinicMedical,
 } from "react-icons/fa";
 import "./Navbar.css";
 
 function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation(); // السطر ده بيجبر الناف بار يتحدث ويقرا التوكن الجديد مع كل تغيير مسار
   const token = localStorage.getItem("token");
   const dashboardAuth = localStorage.getItem("dashboardAuth");
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("refresh");
     localStorage.removeItem("user");
     localStorage.removeItem("role");
     localStorage.removeItem("dashboardAuth");
@@ -27,7 +29,7 @@ function Navbar() {
   };
 
   const linkClass = ({ isActive }) => (isActive ? "nav-item active" : "nav-item");
-  const isLoggedIn = token || dashboardAuth;
+  const isLoggedIn = !!token;
 
   return (
     <nav className="navbar">
@@ -50,10 +52,10 @@ function Navbar() {
         </NavLink>
 
         <NavLink to="/contracted-pharmacies" className={linkClass}>
-          <FaComments /> Contracted Pharmacies
+          <FaClinicMedical /> Contracted Pharmacies
         </NavLink>
 
-        <NavLink to="/super-admin" className={linkClass}>
+        <NavLink to="/dashboard" className={linkClass}>
           <FaShieldAlt /> Dashboard
         </NavLink>
 

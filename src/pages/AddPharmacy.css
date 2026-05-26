@@ -1,0 +1,183 @@
+.add-pharmacy-page {
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #020617,
+      #0f172a
+    );
+
+  font-family: sans-serif;
+}
+
+.add-pharmacy-card {
+  width: 100%;
+  max-width: 760px;
+
+  background: #0f172a;
+
+  border-radius: 24px;
+
+  padding: 40px;
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.35);
+}
+
+.header-section {
+  margin-bottom: 35px;
+}
+
+.header-section h2 {
+  color: white;
+  font-size: 38px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.header-section p {
+  color: #94a3b8;
+  font-size: 15px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.input-group label {
+  color: #e2e8f0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.input-group input,
+.input-group textarea {
+  width: 100%;
+
+  background: #1e293b;
+
+  border: 1px solid #334155;
+
+  border-radius: 16px;
+
+  padding: 16px;
+
+  color: white;
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition: 0.3s;
+}
+
+.input-group textarea {
+  min-height: 120px;
+  resize: none;
+}
+
+.input-group input:focus,
+.input-group textarea:focus {
+  border-color: #22c55e;
+
+  box-shadow:
+    0 0 0 3px rgba(34,197,94,0.2);
+}
+
+.input-group input::placeholder,
+.input-group textarea::placeholder {
+  color: #94a3b8;
+}
+
+.section-title {
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+
+  margin-top: 10px;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  color: white;
+}
+
+.checkbox-wrapper input {
+  width: 18px;
+  height: 18px;
+
+  accent-color: #22c55e;
+}
+
+button {
+  width: 100%;
+
+  border: none;
+
+  padding: 16px;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #22c55e,
+      #06b6d4
+    );
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+
+  margin-top: 10px;
+}
+
+button:hover {
+  transform: translateY(-2px);
+
+  opacity: 0.95;
+}
+
+@media (max-width: 768px) {
+
+  .add-pharmacy-card {
+    padding: 24px;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .header-section h2 {
+    font-size: 30px;
+  }
+}

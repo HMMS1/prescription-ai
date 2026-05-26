@@ -1,14 +1,15 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
-function ProtectedRoute({ children, allowDashboard = false }) {
+function ProtectedRoute() {
   const token = localStorage.getItem("token");
-  const dashboardAuth = localStorage.getItem("dashboardAuth");
 
-  if (!token && !(allowDashboard && dashboardAuth === "true")) {
+  // لو مفيش توكن يرجعه لصفحة اللوجين فوراً
+  if (!token) {
     return <Navigate to="/auth" replace />;
   }
 
-  return children;
+  // لو فيه توكن يعرض الصفحة اللي داس عليها بسلاسة
+  return <Outlet />;
 }
 
 export default ProtectedRoute;

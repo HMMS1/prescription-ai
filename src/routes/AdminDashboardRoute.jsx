@@ -1,13 +1,34 @@
-import { Navigate } from "react-router-dom";
+import {
+  Navigate,
+  Outlet,
+} from "react-router-dom";
 
-function AdminDashboardRoute({ children }) {
-  const dashboardAuth = localStorage.getItem("dashboardAuth");
+function AdminDashboardRoute() {
 
-  if (dashboardAuth !== "true") {
-    return <Navigate to="/super-admin" replace />;
+  const adminToken =
+    localStorage.getItem(
+      "admin_token"
+    );
+
+  const dashboardAuth =
+    localStorage.getItem(
+      "dashboardAuth"
+    );
+
+  if (
+    !adminToken ||
+    dashboardAuth !== "true"
+  ) {
+
+    return (
+      <Navigate
+        to="/dashboard"
+        replace
+      />
+    );
   }
 
-  return children;
+  return <Outlet />;
 }
 
 export default AdminDashboardRoute;

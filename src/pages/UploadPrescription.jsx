@@ -3,42 +3,59 @@ import api from "../api/api";
 import "./UploadPrescription.css";
 
 function UploadPrescription() {
+
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [aiResult, setAiResult] = useState(null);
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleImage = (e) => {
     const selected = e.target.files[0];
-
     if (!selected) return;
-
     setFile(selected);
     setPreview(URL.createObjectURL(selected));
-    setAiResult(null);
+    setResult(null);
+    setError("");
   };
 
-  const analyzePrescription = async () => {
+  const uploadPrescription = async () => {
     if (!file) {
-      alert("Please upload prescription image first");
+      setError("Please upload a prescription image first.");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("You must login first.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("prescription", file);
-
-    setLoading(true);
+    formData.append("image", file);
 
     try {
-      const res = await api.post("/prescriptions/analyze", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      setLoading(true);
+      setError("");
+      setResult(null);
 
-      setAiResult(res.data);
+      const response = await api.post(
+        "/prescriptions/upload/",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      setResult(response.data);
+
     } catch (err) {
-      alert(err.response?.data?.message || "AI analysis failed");
+      console.log("UPLOAD ERROR =>", err.response?.data);
+      if (err.response?.data?.detail) {
+        setError(err.response.data.detail);
+      } else if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError("Upload failed.");
+      }
     } finally {
       setLoading(false);
     }
@@ -46,20 +63,20 @@ function UploadPrescription() {
 
   return (
     <main className="upload-page premium-page">
+
       <section className="page-heading">
         <span>AI Prescription Scanner</span>
         <h1>Upload your prescription</h1>
-        <p>
-          The backend AI service will extract medicine names, dosage, and usage instructions.
-        </p>
+        <p>Upload prescription image and analyze it using AI.</p>
       </section>
 
       <section className="upload-grid">
+
         <div className="glass-card">
           <label className="premium-upload">
             <input type="file" accept="image/*" onChange={handleImage} />
             <div>
-              <h3>Drop or choose prescription image</h3>
+              <h3>Choose prescription image</h3>
               <p>JPG, PNG, JPEG supported</p>
             </div>
           </label>
@@ -70,38 +87,152 @@ function UploadPrescription() {
             </div>
           )}
 
-          <button className="premium-btn" onClick={analyzePrescription} disabled={loading}>
-            {loading ? "Analyzing..." : "Analyze Prescription"}
+          {error && (
+            <p style={{ color: "#ff6b6b", marginTop: "10px" }}>{error}</p>
+          )}
+
+          <button
+            className="premium-btn"
+            onClick={uploadPrescription}
+            disabled={loading}
+          >
+            {loading ? "Analyzing..." : "Upload & Scan"}
           </button>
         </div>
 
         <div className="glass-card result-panel">
-          <h2>AI Result</h2>
+          <h2>Analysis Result</h2>
 
-          {!aiResult && (
-            <p className="muted">
-              No result yet. After uploading, the backend will return extracted medicines here.
+          {!result && !loading && (
+            <p className="muted">No result yet.</p>
+          )}
+
+          {loading && (
+            <p className="muted" style={{ color: "var(--primary)" }}>
+              AI analyzing...
             </p>
           )}
 
-          {aiResult && (
+          {result && (
             <div className="result-content">
-              <h3>Detected Medicines</h3>
 
-              {aiResult.medicines?.map((item, index) => (
-                <div className="medicine-row" key={index}>
-                  <h4>{item.name}</h4>
-                  <p>{item.dosage}</p>
-                  <span>{item.instructions}</span>
+              <p style={{ color: "#4ade80", marginBottom: "1rem" }}>
+                ✅ {result.message}
+              </p>
+
+              {/* 🔥 تم إضافة التشخيص المتوقع (الاستنتاج) هنا 🔥 */}
+              {result.patient_condition_ar && (
+                <div className="medicine-row" style={{ backgroundColor: "rgba(56, 189, 248, 0.1)", border: "1px solid rgba(56, 189, 248, 0.3)", padding: "15px", borderRadius: "10px", marginBottom: "1rem" }}>
+                  <h4 style={{ color: "#38bdf8", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    💡 التشخيص المتوقع للحالة
+                  </h4>
+                  <p style={{ direction: "rtl", textAlign: "right", fontSize: "1.05rem", lineHeight: "1.6", margin: 0 }}>
+                    {result.patient_condition_ar}
+                  </p>
                 </div>
-              ))}
+              )}
 
-              <a href="/pharmacies" className="premium-btn link-btn">
+              {/* المريض (موجود زي ما هو بدون حذف) */}
+              {result.patient?.name && (
+                <div className="medicine-row">
+                  <h4>Patient</h4>
+                  <p>Name: {result.patient.name}</p>
+                  {result.patient.age && <p>Age: {result.patient.age}</p>}
+                </div>
+              )}
+
+              {/* الدكتور (موجود زي ما هو بدون حذف) */}
+              {result.doctor?.name && (
+                <div className="medicine-row">
+                  <h4>Doctor</h4>
+                  <p>Name: {result.doctor.name}</p>
+                  {result.doctor.specialty && <p>Specialty: {result.doctor.specialty}</p>}
+                </div>
+              )}
+
+              {/* التاريخ */}
+              {result.date && (
+                <div className="medicine-row">
+                  <h4>Date</h4>
+                  <p>{result.date}</p>
+                </div>
+              )}
+
+              {/* الأدوية */}
+              {result.medicines && result.medicines.length > 0 && (
+                <div>
+                  <h3 style={{ margin: "1rem 0 0.5rem" }}>
+                    Medicines / الأدوية
+                  </h3>
+
+                  {result.medicines.map((med, index) => (
+                    <div key={index} className="medicine-row" style={{ marginBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "1rem" }}>
+
+                      {/* اسم الدواء */}
+                      <p style={{ fontWeight: "bold", fontSize: "1rem", marginBottom: "4px" }}>
+                        💊 {med.name_en || med.name}
+                        {med.name_ar && (
+                          <span style={{ color: "var(--primary)", marginRight: "8px", marginLeft: "8px" }}>
+                            — {med.name_ar}
+                          </span>
+                        )}
+                      </p>
+
+                      {/* المرض */}
+                      {med.condition_ar && (
+                        <p style={{ color: "#facc15", marginBottom: "4px" }}>
+                          🏥 يعالج: {med.condition_ar}
+                          {med.condition_en && (
+                            <span style={{ opacity: 0.6, fontSize: "0.85rem", marginRight: "6px" }}>
+                              ({med.condition_en})
+                            </span>
+                          )}
+                        </p>
+                      )}
+
+                      {/* وصف الدواء */}
+                      {med.description_ar && (
+                        <p style={{ opacity: 0.75, fontSize: "0.9rem", marginBottom: "6px", direction: "rtl", textAlign: "right" }}>
+                          {med.description_ar}
+                        </p>
+                      )}
+
+                      {/* الجرعة والتفاصيل */}
+                      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "6px" }}>
+                        {med.dosage && (
+                          <span style={{ background: "rgba(36,242,170,0.1)", border: "1px solid rgba(36,242,170,0.2)", borderRadius: "8px", padding: "3px 10px", fontSize: "0.85rem" }}>
+                            الجرعة: {med.dosage}
+                          </span>
+                        )}
+                        {med.frequency && (
+                          <span style={{ background: "rgba(36,242,170,0.1)", border: "1px solid rgba(36,242,170,0.2)", borderRadius: "8px", padding: "3px 10px", fontSize: "0.85rem" }}>
+                            {med.frequency}
+                          </span>
+                        )}
+                        {med.duration && (
+                          <span style={{ background: "rgba(36,242,170,0.1)", border: "1px solid rgba(36,242,170,0.2)", borderRadius: "8px", padding: "3px 10px", fontSize: "0.85rem" }}>
+                            {med.duration}
+                          </span>
+                        )}
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <a
+                href="/pharmacies"
+                className="premium-btn link-btn"
+                style={{ display: "inline-block", marginTop: "1.5rem" }}
+              >
                 Find Nearest Pharmacy
               </a>
+
             </div>
           )}
         </div>
+
       </section>
     </main>
   );
