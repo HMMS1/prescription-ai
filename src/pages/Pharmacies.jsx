@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // ضفنا الـ useNavigate هنا
+import { Link, useNavigate } from "react-router-dom";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { FaWhatsapp, FaPhoneAlt, FaMapMarkerAlt, FaComments } from "react-icons/fa";
 import "./Pharmacies.css";
@@ -14,7 +14,7 @@ const mapContainerStyle = {
 
 function Pharmacies() {
   const mapRef = useRef(null);
-  const navigate = useNavigate(); // تعريف الـ navigate عشان نستخدمه في زرار الشات
+  const navigate = useNavigate();
 
   const [userLocation, setUserLocation] = useState(null);
   const [pharmacies, setPharmacies] = useState([]);
@@ -148,9 +148,9 @@ function Pharmacies() {
                 </div>
 
                 <div className="contact-actions">
-                  {/* تم تعديل لينك جوجل ماب عشان يشتغل بشكل صحيح */}
+                  {/* 🔥 تم التعديل هنا: رابط صحيح لخرائط جوجل */}
                   <a
-                    href={`https://maps.google.com/?q=${pharmacy.lat},${pharmacy.lng}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${pharmacy.lat},${pharmacy.lng}`}
                     target="_blank"
                     rel="noreferrer"
                     title="Open in Google Maps"
@@ -166,7 +166,6 @@ function Pharmacies() {
                     <FaWhatsapp />
                   </a>
 
-                  {/* زرار الشات الجديد اللي بينقل اليوزر لصفحة الشات */}
                   <button 
                     onClick={() => navigate(`/chat/${pharmacy.id}`)}
                     title="Chat with Pharmacy"
@@ -174,7 +173,6 @@ function Pharmacies() {
                   >
                     <FaComments />
                   </button>
-
                 </div>
               </div>
             ))
