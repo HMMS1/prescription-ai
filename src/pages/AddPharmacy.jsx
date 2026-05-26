@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "./api"; // استيراد الـ api الموحد اللي عدلناه
 
 import "./AddPharmacy.css";
 
@@ -46,34 +46,8 @@ const AddPharmacy = () => {
 
       setLoading(true);
 
-      // مهم جدًا
-      // توكن الأدمن فقط
-      const token =
-        localStorage.getItem(
-          "dashboard_token"
-        );
-
-      if (!token) {
-
-        alert(
-          "Please login to dashboard first"
-        );
-
-        setLoading(false);
-
-        return;
-      }
-
-      await axios.post(
-        "http://127.0.0.1:8000/api/v1/pharmacies/",
-        formData,
-        {
-          headers: {
-            Authorization:
-              `Bearer ${token}`,
-          },
-        }
-      );
+      // بنستخدم api الموحد، فمش محتاجين نبعت الـ full URL ولا الـ headers يدوياً
+      await api.post("/pharmacies/", formData);
 
       alert(
         "Pharmacy Added Successfully"
