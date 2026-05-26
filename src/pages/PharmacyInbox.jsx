@@ -1,58 +1,30 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/api";
 
 const PharmacyInbox = () => {
 
-  const [users, setUsers] =
-    useState([]);
-
-  const token =
-    localStorage.getItem("token");
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
 
-    axios.get(
-      "http://127.0.0.1:8000/api/v1/pharmacy-conversations/",
-      {
-        headers: {
-          Authorization:
-            `Bearer ${token}`,
-        },
-      }
-    )
+    api.get("/pharmacy-conversations/")
     .then((res) => {
-
       setUsers(res.data);
-
     })
     .catch((err) => {
-
       console.log(err);
     });
 
   }, []);
 
   return (
-
     <div>
-
-      <h2>
-        Users Conversations
-      </h2>
-
-      {
-        users.map((user) => (
-
-          <div key={user.id}>
-
-            <h3>
-              {user.username}
-            </h3>
-
-          </div>
-        ))
-      }
-
+      <h2>Users Conversations</h2>
+      {users.map((user) => (
+        <div key={user.id}>
+          <h3>{user.username}</h3>
+        </div>
+      ))}
     </div>
   );
 };
