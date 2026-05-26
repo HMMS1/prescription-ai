@@ -25,12 +25,6 @@ function UploadPrescription() {
       return;
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("You must login first.");
-      return;
-    }
-
     const formData = new FormData();
     formData.append("image", file);
 
@@ -39,11 +33,8 @@ function UploadPrescription() {
       setError("");
       setResult(null);
 
-      const response = await api.post(
-        "/prescriptions/upload/",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      // هنا شلنا الـ headers، الـ api (axios instance) بيعرف يتعامل مع الـ FormData لوحده
+      const response = await api.post("/prescriptions/upload/", formData);
 
       setResult(response.data);
 
@@ -120,7 +111,6 @@ function UploadPrescription() {
                 ✅ {result.message}
               </p>
 
-              {/* 🔥 تم إضافة التشخيص المتوقع (الاستنتاج) هنا 🔥 */}
               {result.patient_condition_ar && (
                 <div className="medicine-row" style={{ backgroundColor: "rgba(56, 189, 248, 0.1)", border: "1px solid rgba(56, 189, 248, 0.3)", padding: "15px", borderRadius: "10px", marginBottom: "1rem" }}>
                   <h4 style={{ color: "#38bdf8", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
@@ -132,7 +122,6 @@ function UploadPrescription() {
                 </div>
               )}
 
-              {/* المريض (موجود زي ما هو بدون حذف) */}
               {result.patient?.name && (
                 <div className="medicine-row">
                   <h4>Patient</h4>
@@ -141,7 +130,6 @@ function UploadPrescription() {
                 </div>
               )}
 
-              {/* الدكتور (موجود زي ما هو بدون حذف) */}
               {result.doctor?.name && (
                 <div className="medicine-row">
                   <h4>Doctor</h4>
@@ -150,7 +138,6 @@ function UploadPrescription() {
                 </div>
               )}
 
-              {/* التاريخ */}
               {result.date && (
                 <div className="medicine-row">
                   <h4>Date</h4>
@@ -158,7 +145,6 @@ function UploadPrescription() {
                 </div>
               )}
 
-              {/* الأدوية */}
               {result.medicines && result.medicines.length > 0 && (
                 <div>
                   <h3 style={{ margin: "1rem 0 0.5rem" }}>
@@ -168,7 +154,6 @@ function UploadPrescription() {
                   {result.medicines.map((med, index) => (
                     <div key={index} className="medicine-row" style={{ marginBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "1rem" }}>
 
-                      {/* اسم الدواء */}
                       <p style={{ fontWeight: "bold", fontSize: "1rem", marginBottom: "4px" }}>
                         💊 {med.name_en || med.name}
                         {med.name_ar && (
@@ -178,7 +163,6 @@ function UploadPrescription() {
                         )}
                       </p>
 
-                      {/* المرض */}
                       {med.condition_ar && (
                         <p style={{ color: "#facc15", marginBottom: "4px" }}>
                           🏥 يعالج: {med.condition_ar}
@@ -190,14 +174,12 @@ function UploadPrescription() {
                         </p>
                       )}
 
-                      {/* وصف الدواء */}
                       {med.description_ar && (
                         <p style={{ opacity: 0.75, fontSize: "0.9rem", marginBottom: "6px", direction: "rtl", textAlign: "right" }}>
                           {med.description_ar}
                         </p>
                       )}
 
-                      {/* الجرعة والتفاصيل */}
                       <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "6px" }}>
                         {med.dosage && (
                           <span style={{ background: "rgba(36,242,170,0.1)", border: "1px solid rgba(36,242,170,0.2)", borderRadius: "8px", padding: "3px 10px", fontSize: "0.85rem" }}>
