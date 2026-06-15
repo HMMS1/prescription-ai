@@ -1,0 +1,113 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api/axios';
+
+export default function UploadPrescription() {
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [locating, setLocating] = useState(false);
+  const [pharmacies, setPharmacies] = useState([]);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const findPharmacies = () => {
+    if (!image) { setError('ارفع صورة الروشتة الأول'); return; }
+    setLocating(true);
+    setError('');
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { data } = await api.get('/pharmacies/nearest/', {
+            params: { lat: pos.coords.latitude, lng: pos.coords.longitude }
+          });
+          setPharmacies(data);
+        } catch {
+          setError('مش قادر يجيب الصيدليات');
+        } finally {
+          setLocating(false);
+        }
+      },
+      () => { setError('مش قادر يحدد موقعك'); setLocating(false); },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const startChat = async (pharmacyId) => {
+    try {
+      const { data: conv } = await api.post(`/chat/conversations/start/${pharmacyId}/`, {});
+      // ابعت الصورة في المحادثة
+      const formData = new FormData();
+      formData.append('image', image);
+      await api.post(`/chat/conversations/${conv.id}/send/`, formData);
+      navigate(`/chat/${conv.id}`);
+    } catch {
+      setError('مش قادر يبدأ المحادثة');
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>ارفع الروشتة</h1>
+
+        <label style={styles.uploadArea}>
+          {preview ? (
+            <img src={preview} alt="الروشتة" style={styles.preview} />
+          ) : (
+            <div>
+              <p style={{ fontSize: '3rem' }}>📋</p>
+              <p>اضغط لاختيار صورة الروشتة</p>
+            </div>
+          )}
+          <input type="file" accept="image/*" onChange={handleImage} style={{ display: 'none' }} />
+        </label>
+
+        {error && <p style={styles.error}>{error}</p>}
+
+        <button style={styles.btn} onClick={findPharmacies} disabled={locating}>
+          {locating ? '⏳ جاري تحديد موقعك وإيجاد أقرب صيدلية...' : '🔍 ابحث عن أقرب صيدلية'}
+        </button>
+
+        {/* نتايج الصيدليات */}
+        {pharmacies.length > 0 && (
+          <div style={{ marginTop: '1.5rem' }}>
+            <h3 style={{ marginBottom: '1rem', color: '#1a1a2e' }}>أقرب الصيدليات</h3>
+            {pharmacies.map(p => (
+              <div key={p.id} style={styles.pharmacyCard}>
+                <div>
+                  <p style={styles.pharmacyName}>{p.name}</p>
+                  <p style={styles.pharmacyDist}>📍 {p.distance} كم</p>
+                </div>
+                <button style={styles.chatBtn} onClick={() => startChat(p.id)}>
+                  إرسال الروشتة
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  container: { minHeight: '100vh', background: '#f5f5f5', direction: 'rtl', padding: '2rem 1rem', display: 'flex', justifyContent: 'center' },
+  card: { background: '#fff', padding: '2rem', borderRadius: '12px', boxShadow: '0 2px 16px rgba(0,0,0,0.1)', width: '100%', maxWidth: '500px', height: 'fit-content' },
+  title: { textAlign: 'center', marginBottom: '1.5rem', color: '#1a1a2e' },
+  uploadArea: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed #c7c7ff', borderRadius: '12px', padding: '2rem', cursor: 'pointer', marginBottom: '1rem', minHeight: '180px', background: '#fafaff', textAlign: 'center' },
+  preview: { maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', objectFit: 'cover' },
+  btn: { width: '100%', padding: '0.85rem', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1rem', cursor: 'pointer' },
+  error: { color: 'red', textAlign: 'center', marginBottom: '0.5rem' },
+  pharmacyCard: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.85rem 1rem', border: '1px solid #e5e5e5', borderRadius: '10px', marginBottom: '0.75rem' },
+  pharmacyName: { fontWeight: '600', marginBottom: '0.25rem' },
+  pharmacyDist: { color: '#666', fontSize: '0.9rem' },
+  chatBtn: { padding: '0.5rem 1rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', whiteSpace: 'nowrap' },
+};
