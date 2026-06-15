@@ -1,0 +1,124 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
+
+export default function ChatPage() {
+  const { convId } = useParams();
+  const { user } = useAuth();
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState('');
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const wsRef = useRef(null);
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    // جيب الرسايل القديمة
+    api.get(`/chat/conversations/${convId}/messages/`)
+      .then(({ data }) => { setMessages(data); setLoading(false); })
+      .catch(() => setLoading(false));
+
+    // WebSocket للرسايل الجديدة
+    const token = localStorage.getItem('access_token');
+    const ws = new WebSocket(`wss://hamzamostafa25.pythonanywhere.com/ws/chat/${convId}/?token=${token}`);
+    wsRef.current = ws;
+
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      setMessages(prev => [...prev, {
+        id: data.message_id,
+        text: data.message,
+        sender_type: data.sender_type,
+        created_at: data.created_at,
+      }]);
+    };
+
+    return () => ws.close();
+  }, [convId]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const sendMessage = async () => {
+    if (!text.trim() && !image) return;
+
+    if (image) {
+      const formData = new FormData();
+      if (text) formData.append('text', text);
+      formData.append('image', image);
+      await api.post(`/chat/conversations/${convId}/send/`, formData);
+      setImage(null);
+      setText('');
+    } else {
+      // ابعت عن طريق WebSocket للـ real-time
+      wsRef.current?.send(JSON.stringify({ message: text }));
+      setText('');
+    }
+  };
+
+  const myType = user?.user_type === 'pharmacy' ? 'pharmacy' : 'user';
+
+  if (loading) return <div style={{ textAlign: 'center', padding: '2rem' }}>جاري التحميل...</div>;
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h2 style={styles.headerTitle}>المحادثة</h2>
+      </div>
+
+      <div style={styles.messages}>
+        {messages.map(msg => (
+          <div key={msg.id} style={{ display: 'flex', justifyContent: msg.sender_type === myType ? 'flex-end' : 'flex-start', marginBottom: '0.75rem' }}>
+            <div style={{ ...styles.bubble, ...(msg.sender_type === myType ? styles.myBubble : styles.theirBubble) }}>
+              {msg.image && <img src={`https://hamzamostafa25.pythonanywhere.com${msg.image}`} alt="روشتة" style={styles.msgImage} />}
+              {msg.text && <p style={{ margin: 0 }}>{msg.text}</p>}
+              <span style={styles.time}>{new Date(msg.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
+
+      <div style={styles.inputArea}>
+        {image && (
+          <div style={styles.imagePreview}>
+            <img src={URL.createObjectURL(image)} alt="preview" style={{ height: '40px', borderRadius: '4px' }} />
+            <button onClick={() => setImage(null)} style={styles.removeImg}>✕</button>
+          </div>
+        )}
+        <label style={styles.attachBtn}>
+          📎
+          <input type="file" accept="image/*" onChange={e => setImage(e.target.files[0])} style={{ display: 'none' }} />
+        </label>
+        <input
+          style={styles.textInput}
+          placeholder="اكتب رسالة..."
+          value={text}
+          onChange={e => setText(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && sendMessage()}
+        />
+        <button style={styles.sendBtn} onClick={sendMessage}>إرسال</button>
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  container: { display: 'flex', flexDirection: 'column', height: '100vh', direction: 'rtl', background: '#f5f5f5' },
+  header: { background: '#4f46e5', padding: '1rem 1.5rem', color: '#fff' },
+  headerTitle: { margin: 0 },
+  messages: { flex: 1, overflowY: 'auto', padding: '1rem' },
+  bubble: { maxWidth: '70%', padding: '0.6rem 0.9rem', borderRadius: '12px', fontSize: '0.95rem' },
+  myBubble: { background: '#4f46e5', color: '#fff', borderBottomLeftRadius: '4px' },
+  theirBubble: { background: '#fff', color: '#1a1a2e', borderBottomRightRadius: '4px', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' },
+  msgImage: { maxWidth: '200px', borderRadius: '8px', display: 'block', marginBottom: '0.3rem' },
+  time: { fontSize: '0.7rem', opacity: 0.7, display: 'block', textAlign: 'left', marginTop: '0.2rem' },
+  inputArea: { background: '#fff', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderTop: '1px solid #eee' },
+  textInput: { flex: 1, padding: '0.6rem 0.9rem', border: '1px solid #ddd', borderRadius: '20px', fontSize: '0.95rem', outline: 'none', textAlign: 'right' },
+  sendBtn: { padding: '0.6rem 1.2rem', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: '600' },
+  attachBtn: { fontSize: '1.4rem', cursor: 'pointer', userSelect: 'none' },
+  imagePreview: { display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#f0f0ff', padding: '0.3rem 0.5rem', borderRadius: '8px' },
+  removeImg: { background: 'none', border: 'none', cursor: 'pointer', color: 'red', fontWeight: 'bold' },
+};
