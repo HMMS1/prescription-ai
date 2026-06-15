@@ -1,0 +1,76 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
+
+export default function PharmacyDashboard() {
+  const [conversations, setConversations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    api.get('/chat/conversations/')
+      .then(({ data }) => { setConversations(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h2 style={styles.headerTitle}>لوحة تحكم الصيدلية</h2>
+        <button onClick={logout} style={styles.logoutBtn}>خروج</button>
+      </div>
+
+      <div style={styles.content}>
+        <p style={styles.welcome}>أهلاً، {user?.username} 👋</p>
+
+        {loading ? (
+          <p style={{ textAlign: 'center', color: '#666' }}>جاري التحميل...</p>
+        ) : conversations.length === 0 ? (
+          <div style={styles.empty}>
+            <p style={{ fontSize: '3rem' }}>📭</p>
+            <p>مفيش محادثات لحد دلوقتي</p>
+          </div>
+        ) : (
+          <div>
+            <h3 style={styles.sectionTitle}>المحادثات ({conversations.length})</h3>
+            {conversations.map(conv => (
+              <div key={conv.id} style={styles.convCard} onClick={() => navigate(`/chat/${conv.id}`)}>
+                <div style={styles.convInfo}>
+                  <p style={styles.convUser}>👤 مستخدم #{conv.user || 'مجهول'}</p>
+                  {conv.last_message && (
+                    <p style={styles.lastMsg}>{conv.last_message.text || '📷 صورة'}</p>
+                  )}
+                </div>
+                <div style={{ textAlign: 'left' }}>
+                  {conv.unread_count > 0 && (
+                    <span style={styles.badge}>{conv.unread_count}</span>
+                  )}
+                  <p style={styles.time}>{new Date(conv.updated_at).toLocaleDateString('ar-EG')}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  container: { minHeight: '100vh', background: '#f5f5f5', direction: 'rtl' },
+  header: { background: '#4f46e5', padding: '1rem 1.5rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  headerTitle: { margin: 0 },
+  logoutBtn: { background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', padding: '0.4rem 1rem', borderRadius: '8px', cursor: 'pointer' },
+  content: { maxWidth: '600px', margin: '0 auto', padding: '1.5rem 1rem' },
+  welcome: { fontSize: '1.1rem', color: '#555', marginBottom: '1.5rem' },
+  sectionTitle: { color: '#1a1a2e', marginBottom: '1rem' },
+  convCard: { background: '#fff', padding: '1rem', borderRadius: '10px', marginBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.07)', transition: 'box-shadow 0.2s' },
+  convInfo: { flex: 1 },
+  convUser: { fontWeight: '600', marginBottom: '0.25rem' },
+  lastMsg: { color: '#666', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '250px' },
+  badge: { background: '#ef4444', color: '#fff', borderRadius: '50%', padding: '0.15rem 0.5rem', fontSize: '0.8rem', display: 'inline-block', marginBottom: '0.25rem' },
+  time: { color: '#999', fontSize: '0.8rem' },
+  empty: { textAlign: 'center', color: '#666', padding: '3rem 0' },
+};
