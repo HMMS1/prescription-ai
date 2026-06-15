@@ -1,150 +1,38 @@
-:root {
-  --primary: #24f2aa;
-  --secondary: #21b8ff;
-  --pink: #ff4fd8;
-  --danger: #ff5d7a;
-  --bg: #050b14;
-  --bg-soft: #071524;
-  --card: rgba(255,255,255,0.105);
-  --card-2: rgba(255,255,255,0.055);
-  --border: rgba(255,255,255,0.115);
-  --muted: #9fb3c2;
-  --shadow: 0 28px 85px rgba(0,0,0,0.34);
+.App {
+  text-align: center;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: white;
-  background:
-    radial-gradient(circle at 8% 4%, rgba(36,242,170,0.17), transparent 30%),
-    radial-gradient(circle at 86% 12%, rgba(33,184,255,0.14), transparent 28%),
-    radial-gradient(circle at 50% 100%, rgba(255,79,216,0.08), transparent 32%),
-    linear-gradient(135deg, #040811, #071322 44%, #030711);
-  background-attachment: fixed;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
+.App-logo {
+  height: 40vmin;
   pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent 78%);
-  z-index: -1;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
 }
 
-button,
-input {
-  font-family: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-.premium-page,
-.home-page,
-.pharmacies-page,
-.contracted-page,
-.chat-page,
-.auth-page,
-.super-admin-page,
-.upload-page {
-  position: relative;
-}
-
-.glass-card,
-.premium-card {
-  background: linear-gradient(145deg, var(--card), var(--card-2));
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(24px);
-}
-
-.premium-btn,
-.primary-btn,
-.secondary-btn,
-.submit-btn,
-.add-pharmacy-main-btn {
-  border: 0;
-  outline: 0;
-  min-height: 52px;
-  border-radius: 999px;
-  font-weight: 950;
-  letter-spacing: 0.2px;
-  display: inline-flex;
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  transition: 0.28s ease;
-}
-
-.premium-btn,
-.primary-btn,
-.submit-btn,
-.add-pharmacy-main-btn {
-  color: #021018;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  box-shadow: 0 18px 42px rgba(36,242,170,0.23);
-}
-
-.secondary-btn {
+  font-size: calc(10px + 2vmin);
   color: white;
-  background: rgba(255,255,255,0.085);
-  border: 1px solid rgba(255,255,255,0.12);
 }
 
-.premium-btn:hover,
-.primary-btn:hover,
-.secondary-btn:hover,
-.submit-btn:hover,
-.add-pharmacy-main-btn:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 26px 56px rgba(36,242,170,0.32);
+.App-link {
+  color: #61dafb;
 }
 
-.page-heading {
-  text-align: center;
-  margin-bottom: 45px;
-}
-
-.page-heading span {
-  display: inline-flex;
-  color: var(--primary);
-  background: rgba(36,242,170,0.1);
-  border: 1px solid rgba(36,242,170,0.22);
-  padding: 10px 18px;
-  border-radius: 999px;
-  font-weight: 950;
-  margin-bottom: 18px;
-}
-
-.page-heading h1 {
-  font-size: clamp(38px, 5vw, 64px);
-  letter-spacing: -1.8px;
-  margin: 0 0 12px;
-}
-
-.page-heading p,
-.muted {
-  color: var(--muted);
-  line-height: 1.8;
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
