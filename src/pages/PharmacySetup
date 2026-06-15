@@ -1,0 +1,107 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api/axios';
+
+export default function PharmacySetup() {
+  const [form, setForm] = useState({ name: '', whatsapp: '', latitude: '', longitude: '' });
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsError, setGpsError] = useState('');
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const getLocation = () => {
+    setGpsLoading(true);
+    setGpsError('');
+    if (!navigator.geolocation) {
+      setGpsError('المتصفح مش بيدعم GPS');
+      setGpsLoading(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setForm(f => ({
+          ...f,
+          latitude: pos.coords.latitude.toFixed(6),
+          longitude: pos.coords.longitude.toFixed(6),
+        }));
+        setGpsLoading(false);
+      },
+      (err) => {
+        setGpsError('مش قادر يحدد موقعك، تأكد من السماح بالموقع');
+        setGpsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.latitude || !form.longitude) {
+      setError('لازم تحدد موقع الصيدلية');
+      return;
+    }
+    setSubmitLoading(true);
+    setError('');
+    try {
+      await api.post('/pharmacies/profile/', form);
+      navigate('/pharmacy/dashboard');
+    } catch (err) {
+      setError(JSON.stringify(err.response?.data) || 'حصل خطأ');
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>إكمال بيانات الصيدلية</h1>
+        <p style={styles.subtitle}>خطوة أخيرة عشان تكتمل البروفايل</p>
+
+        <form onSubmit={handleSubmit}>
+          <input style={styles.input} placeholder="اسم الصيدلية" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
+          <input style={styles.input} placeholder="رقم الواتساب (مثال: 201012345678)" value={form.whatsapp} onChange={e => setForm({ ...form, whatsapp: e.target.value })} required />
+
+          {/* GPS Section */}
+          <div style={styles.gpsBox}>
+            <p style={styles.gpsLabel}>موقع الصيدلية</p>
+            <button type="button" style={styles.gpsBtn} onClick={getLocation} disabled={gpsLoading}>
+              {gpsLoading ? '⏳ جاري التحديد...' : '📍 تحديد موقعي تلقائياً'}
+            </button>
+            {gpsError && <p style={styles.error}>{gpsError}</p>}
+            {form.latitude && (
+              <p style={styles.gpsSuccess}>
+                ✅ تم تحديد الموقع ({form.latitude}, {form.longitude})
+              </p>
+            )}
+            {/* Fallback يدوي */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <input style={{ ...styles.input, flex: 1, marginBottom: 0 }} placeholder="خط العرض" value={form.latitude} onChange={e => setForm({ ...form, latitude: e.target.value })} />
+              <input style={{ ...styles.input, flex: 1, marginBottom: 0 }} placeholder="خط الطول" value={form.longitude} onChange={e => setForm({ ...form, longitude: e.target.value })} />
+            </div>
+          </div>
+
+          {error && <p style={styles.error}>{error}</p>}
+          <button style={styles.btn} type="submit" disabled={submitLoading}>
+            {submitLoading ? 'جاري الحفظ...' : 'حفظ وإكمال التسجيل'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  container: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', direction: 'rtl' },
+  card: { background: '#fff', padding: '2rem', borderRadius: '12px', boxShadow: '0 2px 16px rgba(0,0,0,0.1)', width: '100%', maxWidth: '420px' },
+  title: { textAlign: 'center', marginBottom: '0.5rem', color: '#1a1a2e' },
+  subtitle: { textAlign: 'center', color: '#666', marginBottom: '1.5rem' },
+  input: { width: '100%', padding: '0.75rem', marginBottom: '0.75rem', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem', boxSizing: 'border-box', textAlign: 'right' },
+  gpsBox: { background: '#f0f0ff', border: '1px solid #c7c7ff', borderRadius: '10px', padding: '1rem', marginBottom: '1rem' },
+  gpsLabel: { fontWeight: '600', marginBottom: '0.5rem', color: '#4f46e5' },
+  gpsBtn: { width: '100%', padding: '0.7rem', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1rem', marginBottom: '0.5rem' },
+  gpsSuccess: { color: 'green', fontSize: '0.9rem', margin: '0.5rem 0' },
+  btn: { width: '100%', padding: '0.75rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1rem', cursor: 'pointer', marginTop: '0.5rem' },
+  error: { color: 'red', fontSize: '0.85rem', marginTop: '0.25rem' },
+};
